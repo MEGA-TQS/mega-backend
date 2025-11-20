@@ -1,10 +1,9 @@
-# <img src="" alt="" width="300">
-
 # Eva Martins
 **Name:** Eva Martins
 **Age:** 27
 **Occupation:** Marketing Specialist
 **Location:**  Lisbon, Portugal
+
 
 ## Background  
 Eva lives an active lifestyle but doesn’t own much sports equipment due to limited storage in her apartment and her preference for trying different sports without committing to purchases. She often participates in weekend paddleboarding, hiking trips, and casual cycling with friends.

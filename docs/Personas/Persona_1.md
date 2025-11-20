@@ -1,13 +1,12 @@
-# <img src="Alberto_Pais.png" alt="Alberto Pais" width="300">
-
 # Alberto Pais
 **Name:** Alberto Pais
 **Age:** 42
 **Occupation:** Amateur Sports Coach
 **Location:**  Santarém, Portugal
 
+
 ## Background  
-Alberto has been a long-time sports enthusiast. Over the years, he collected a wide range of sports gear—surfboards, kayak equipment, mountain bikes, and football training accessories. Much of it is underused, especially outside training seasons. He is looking for ways to make his gear useful and earn extra income with minimal effort.
+Alberto has been a long-time sports enthusiast. Over the years, he collected a wide range of sports gear like surfboards, kayak equipment, mountain bikes, and football training accessories. Much of it is underused, especially outside training seasons. He is looking for ways to make his gear useful and earn extra income with minimal effort.
  
 
 ## Daily Life  

@@ -1,13 +1,13 @@
-# <img src="" alt="" width="300">
-
 # João Ribeiro
 **Name:** João Ribeiro
 **Age:** 24
 **Occupation:** Computer Engineering Student
 **Location:**  Coimbra, Portugal
 
+
 ## Background  
 João enjoys outdoor activities but never invested in sports equipment due to limited living space and a preference for trying different sports before committing. He often joins friends for spontaneous activities such as paddle, tennis, hiking trails, or cycling. 
+
 
 ## Daily Life  
 - Attends classes and group project meetings
@@ -19,6 +19,7 @@ João enjoys outdoor activities but never invested in sports equipment due to li
 - Uses apps daily for transport, meals, and gym access
  
 - Looks for sports inspiration on Instagram and TikTok
+
 
 ## Goals & Needs  
 - Easy-to-use, beginner-friendly equipment
