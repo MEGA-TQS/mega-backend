@@ -11,9 +11,9 @@
 
 ## Whats the Project About?
 
-#### App for Rental of Sports Gear:
+#### MEGA (Multisport Equipment Gear App):
 
-This project, essentially, consists of an app for people to rent sports gear from other people (peer-to-peer). Users can list their items for renting and customers will rent them for a fee. They can also be agended for renting.
+This project, essentially, consists of an app for people to rent sports gear from other people (peer-to-peer). Users can list their items for renting and customers will rent them for a fee. They can also be agended for renting (for ).
 
 
 ## Project Bookmarks:
