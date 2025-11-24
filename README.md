@@ -5,7 +5,7 @@
 - Gonçalo Ribau - 119560
 - Bernardo Lázaro - 119230
 - Rodrigo Costa - 119585
-- Diogo Pinherio - 119907
+- Diogo Pinheiro - 119907
 
 ---
 
