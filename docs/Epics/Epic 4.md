@@ -29,4 +29,3 @@ Alberto: wants protection against damage and guaranteed payments.
 
 5. Digital receipts.
 
-6. Automatic transfer to the owner after return validation.

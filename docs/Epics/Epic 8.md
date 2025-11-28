@@ -23,4 +23,3 @@ All users (Alberto, Eva, João, Sara).
 
 4. Booking and listing history.
 
-5. Optional identity verification.

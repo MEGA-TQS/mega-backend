@@ -15,7 +15,7 @@ Platform Administrator.
 
 **Included Features**:
 
-1. Dashboard with KPIs:
+1. Dashboard with key performance indicators:
 
     - Active users
 

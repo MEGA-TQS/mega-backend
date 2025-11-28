@@ -25,8 +25,5 @@ Sara: needs to see advanced availability to plan trips.
 
 3. Availability filter by dates.
 
-4. Highlighting of items with "Instant Book".
 
-5. Recommendations for beginner users.
 
-6. Results page with photos, price, ratings, and availability.

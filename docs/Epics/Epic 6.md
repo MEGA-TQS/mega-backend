@@ -19,8 +19,5 @@ Sara: needs advanced planning and group management.
 
 2. Combined availability for the whole group.
 
-3. Clear cancellation policies.
+3. Single payment for the entire booking.
 
-4. Single payment for the entire booking.
-
-5. Group dashboard with shared information.

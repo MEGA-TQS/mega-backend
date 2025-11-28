@@ -23,12 +23,9 @@ Alberto: wants to streamline approvals and avoid schedule conflicts.
 
 2. Approval/rejection by the owner.
 
-3. Immediate booking (“Instant Book”).
-
-4. Automatic calendar blocking after approval.
+3. Automatic calendar blocking after approval.
 
 5. Prevention of double-booking.
 
 6. Management of future bookings.
 
-7. Rules: buffers, seasonal breaks, automatic checks.

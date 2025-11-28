@@ -23,8 +23,3 @@ Alberto: wants a simple, fast, and low-maintenance system.
 
 4. Availability calendar with seasonal rules.
 
-5. Set buffers between bookings (e.g., 48h).
-
-6. Activate/deactivate listings.
-
-7. Manage accessories and additional options.

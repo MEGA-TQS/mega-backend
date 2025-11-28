@@ -17,7 +17,7 @@ Alberto: wants to minimize unnecessary conversations and delays.
 
 **Included Features**:
 
-1. Push/email notifications for requests.
+1. Push notifications for requests.
 
 2. Booking confirmations.
 
