@@ -16,12 +16,19 @@
 - H2 Database
 - PostgreSQL
 
+
 # UI:
 
 - React
 
+
 # SQE Tools:
 
-- Jacoco
-- Cucumber
-- SonarQube
+- Jira (Project Management)
+- Xray (Test Management)
+- JUnit 5 + Mockito (Unit/Integration Testing) 
+- Jacoco (Code Coverage)
+- Cucumber (BDD/Acceptance)
+- SonarQube (Static Analysis)
+- k6 (Load Testing)
+- Github Actions (CI/CD Pipeline)
