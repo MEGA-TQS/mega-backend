@@ -19,3 +19,9 @@
 # UI:
 
 - React
+
+# SQE Tools:
+
+- Jacoco
+- Cucumber
+- SonarQube
