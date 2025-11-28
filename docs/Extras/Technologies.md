@@ -15,3 +15,7 @@
 - Spring Boot DevTools
 - H2 Database
 - PostgreSQL
+
+# UI:
+
+- React
