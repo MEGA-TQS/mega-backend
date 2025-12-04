@@ -2,7 +2,8 @@ package com.sportsgear.rentalplatform.boundary;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.sportsgear.rentalplatform.data.*;
+import com.sportsgear.rentalplatform.data.Booking;
+import com.sportsgear.rentalplatform.data.BookingRequest;
 
 @RestController
 @RequestMapping("/api/bookings")
