@@ -7,15 +7,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.sportsgear.rentalplatform.data.Booking;
-import com.sportsgear.rentalplatform.data.BookingItem;
-import com.sportsgear.rentalplatform.data.BookingRepository;
-import com.sportsgear.rentalplatform.data.BookingRequest;
-import com.sportsgear.rentalplatform.data.BookingStatus;
-import com.sportsgear.rentalplatform.data.Item;
-import com.sportsgear.rentalplatform.data.ItemRepository;
-import com.sportsgear.rentalplatform.data.User;
-import com.sportsgear.rentalplatform.data.UserRepository;
+import com.sportsgear.rentalplatform.data.*;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +94,7 @@ public class BookingService {
             throw new IllegalStateException("User is not the owner of all rented items.");
         }
     
-        booking.setStatus(BookingStatus.ACCEPTED);
+        booking.setStatus(BookingStatus.APPROVED);
         return bookingRepository.save(booking);
     }
     
@@ -122,7 +114,7 @@ public class BookingService {
             throw new IllegalStateException("User is not the owner of all rented items.");
         }
     
-        booking.setStatus(BookingStatus.DECLINED);
+        booking.setStatus(BookingStatus.REJECTED);
         return bookingRepository.save(booking);
     }
 

@@ -3,9 +3,9 @@ package com.sportsgear.rentalplatform.boundary;
 import com.sportsgear.rentalplatform.data.Item;
 import com.sportsgear.rentalplatform.service.ItemService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -27,7 +27,7 @@ public class ItemControllerTest {
     @Autowired
     private MockMvc mockMvc; // Simula o envio de pedidos HTTP 
 
-    @MockBean
+    @Mock
     private ItemService itemService; // Cria um "falso" serviço para não usar a BD
 
     @Test
