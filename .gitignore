@@ -134,4 +134,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+venv
+
 # End of https://www.toptal.com/developers/gitignore/api/maven,java,visualstudiocode,linux,windows,react,sonarqube
