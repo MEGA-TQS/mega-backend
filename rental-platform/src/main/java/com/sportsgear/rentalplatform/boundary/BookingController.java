@@ -11,13 +11,22 @@ public class BookingController {
 
     // POST /api/bookings
     @PostMapping
-    public Booking createBooking(@RequestBody BookingRequest request) { ... }
+    public Booking createBooking(@RequestBody BookingRequest request) {
+
+    
+    ... }
 
     // PATCH /api/bookings/{id}/status
     @PatchMapping("/{id}/status")
-    public Booking updateStatus(...) { ... }
+    public Booking updateStatus(...) {
+
+    
+    ... }
 
     // POST /api/bookings/{id}/payment
     @PostMapping("/{id}/payment")
-    public Booking processPayment(...) { ... }
+    public Booking processPayment(...) {
+
+
+    ... }
 }

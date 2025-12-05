@@ -1,0 +1,86 @@
+package com.sportsgear.rentalplatform.service;
+
+import java.math.BigDecimal;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.sportsgear.rentalplatform.data.Booking;
+import com.sportsgear.rentalplatform.data.BookingItem;
+import com.sportsgear.rentalplatform.data.BookingRepository;
+import com.sportsgear.rentalplatform.data.BookingRequest;
+import com.sportsgear.rentalplatform.data.BookingStatus;
+import com.sportsgear.rentalplatform.data.Item;
+import com.sportsgear.rentalplatform.data.ItemRepository;
+import com.sportsgear.rentalplatform.data.User;
+import com.sportsgear.rentalplatform.data.UserRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class BookingService {
+
+    private final BookingRepository bookingRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public Booking createGroupBooking(BookingRequest request) {
+
+        User renter = userRepository.findById(request.getRenterId())
+                .orElseThrow(() -> new IllegalArgumentException("Renter not found with ID: " + request.getRenterId()));
+
+        List<Item> itemsToRent = itemRepository.findAllById(request.getItemIds());
+
+        if (itemsToRent.size() != request.getItemIds().size()) {
+            throw new IllegalArgumentException("Invalid Item IDs provided. Some items do not exist.");
+        }
+
+        boolean hasConflict = bookingRepository.existsOverlappingBookings(
+                request.getItemIds(),
+                request.getStartDate(),
+                request.getEndDate()
+        );
+
+        if (hasConflict) {
+            throw new IllegalStateException("Selected items are not available for the requested dates.");
+        }
+
+        Booking booking = Booking.builder()
+                .renter(renter)
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .status(BookingStatus.PENDING)
+                .items(new ArrayList<>())
+                .build();
+
+        long days = ChronoUnit.DAYS.between(request.getStartDate(), request.getEndDate());
+        if (days < 1) {
+            days = 1;
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (Item item : itemsToRent) {
+            BookingItem bookingItem = BookingItem.builder()
+                    .booking(booking)
+                    .item(item)
+                    .priceAtBooking(item.getPricePerDay())
+                    .build();
+
+            booking.getItems().add(bookingItem);
+
+            BigDecimal itemCost = item.getPricePerDay().multiply(BigDecimal.valueOf(days));
+            total = total.add(itemCost);
+        }
+
+        booking.setTotalPrice(total);
+
+        // Gravar
+        return bookingRepository.save(booking);
+    }
+}
