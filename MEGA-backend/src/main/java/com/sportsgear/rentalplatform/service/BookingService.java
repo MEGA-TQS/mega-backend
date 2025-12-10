@@ -118,4 +118,23 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
+    // US5 - Processar Pagamento
+    @Transactional
+    public Booking processPayment(Long bookingId, String paymentToken) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+
+        if (booking.getStatus() != BookingStatus.APPROVED) {
+            throw new IllegalStateException("Payment failed: Booking is not in APPROVED state.");
+        }
+
+        if ("INVALID".equals(paymentToken)) {
+            throw new IllegalStateException("Payment rejected by provider.");
+        }
+
+        booking.setStatus(BookingStatus.PAID);
+        
+        
+        return bookingRepository.save(booking);
+    }
 }
