@@ -30,6 +30,7 @@ jobs:
           cache: maven
       
       - name: Build and Analyze Java Backend with Maven
+        working-directory: ./MEGA-backend
         run: |
           mvn -B verify sonar:sonar \
             -Dsonar.organization=${{ secrets.ORG_KEY }} \
@@ -40,17 +41,17 @@ jobs:
 
       # JavaScript Frontend Setup and Analysis
       - name: Install Frontend Dependencies
-        working-directory: MEGA-frontend 
+        working-directory: ./MEGA-frontend 
         run: npm install
 
       - name: Run Frontend Unit Tests (Generate Coverage Report)
-        working-directory: MEGA-frontend
+        working-directory: ./MEGA-frontend
         run: npm test -- --coverage --watchAll=false 
 
       - name: Analyze JavaScript Frontend (Separate Scan)
         uses: sonarsource/sonarcloud-github-action@master
         with:
-          projectBaseDir: MEGA-frontend
+          projectBaseDir: ./MEGA-frontend
           args: >
             -Dsonar.organization=${{ secrets.ORG_KEY }}
             -Dsonar.projectKey=${{ secrets.PROJ_KEY }}  
