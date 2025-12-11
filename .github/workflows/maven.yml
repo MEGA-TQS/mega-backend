@@ -28,10 +28,10 @@ jobs:
           cache: maven
 
       - name: Build with Maven
-        working-directory: ./MEGA-backend
+        working-directory: MEGA-backend
         run: mvn -B clean verify
 
       - name: Update dependency graph
         uses: advanced-security/maven-dependency-submission-action@v3
         with:
-          directory: ./MEGA-backend
+          directory: MEGA-backend
