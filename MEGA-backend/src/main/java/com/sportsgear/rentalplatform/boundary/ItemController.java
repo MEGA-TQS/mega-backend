@@ -6,20 +6,12 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.sportsgear.rentalplatform.data.Item;
-import com.sportsgear.rentalplatform.dto.BlockDateDto;
-import com.sportsgear.rentalplatform.dto.ItemCreateDto;
-import com.sportsgear.rentalplatform.dto.ItemPriceUpdateDto;
+import com.sportsgear.rentalplatform.dto.BlockDateDTO;
+import com.sportsgear.rentalplatform.dto.ItemCreateDTO;
+import com.sportsgear.rentalplatform.dto.ItemPriceUpdateDTO;
 import com.sportsgear.rentalplatform.service.ItemService;
 
 import jakarta.validation.Valid;
@@ -48,7 +40,7 @@ public class ItemController {
         return itemService.search(keyword, category, location, startDate, endDate, minPrice, maxPrice);
     }
 
-    // US2: View Item Details
+    // View item details
     // GET /api/items/1
     @GetMapping("/{id}")
     public ResponseEntity<Item> getItemDetails(@PathVariable Long id) {
@@ -58,10 +50,10 @@ public class ItemController {
                    .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // US6: Create Equipment Listing
+    // Create item listing
     // POST /api/items
     @PostMapping
-    public ResponseEntity<Item> createItem(@RequestBody @Valid ItemCreateDto request) {
+    public ResponseEntity<Item> createItem(@RequestBody @Valid ItemCreateDTO request) {
         try {
             Item createdItem = itemService.createItem(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
@@ -70,13 +62,13 @@ public class ItemController {
         }
     }
 
-    // US7: Atualizar Preço
+    // Update price
     // PATCH /api/items/{id}/price?ownerId=1
     @PatchMapping("/{id}/price")
     public ResponseEntity<Item> updatePrice(
             @PathVariable Long id,
             @RequestParam Long ownerId,
-            @RequestBody @Valid ItemPriceUpdateDto dto) {
+            @RequestBody @Valid ItemPriceUpdateDTO dto) {
         try {
             Item updatedItem = itemService.updatePrice(id, dto.getNewPrice(), ownerId);
             return ResponseEntity.ok(updatedItem);
@@ -87,13 +79,13 @@ public class ItemController {
         }
     }
 
-    // US7: Bloquear Datas
+    // Block dates
     // POST /api/items/{id}/block?ownerId=1
     @PostMapping("/{id}/block")
     public ResponseEntity<Void> blockDates(
             @PathVariable Long id,
             @RequestParam Long ownerId,
-            @RequestBody @Valid BlockDateDto dto) {
+            @RequestBody @Valid BlockDateDTO dto) {
         try {
             itemService.blockDates(id, dto.getStartDate(), dto.getEndDate(), ownerId);
             return ResponseEntity.ok().build();

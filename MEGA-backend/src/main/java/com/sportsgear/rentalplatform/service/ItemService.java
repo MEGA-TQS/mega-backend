@@ -16,7 +16,7 @@ import com.sportsgear.rentalplatform.data.BookingStatus;
 import com.sportsgear.rentalplatform.data.Item;
 import com.sportsgear.rentalplatform.data.ItemRepository;
 import com.sportsgear.rentalplatform.data.UserRepository;
-import com.sportsgear.rentalplatform.dto.ItemCreateDto;
+import com.sportsgear.rentalplatform.dto.ItemCreateDTO;
 
 import jakarta.transaction.Transactional;
 
@@ -51,7 +51,7 @@ public class ItemService {
     }
 
     // US6: Create Listing
-    public Item createItem(ItemCreateDto dto) {
+    public Item createItem(ItemCreateDTO dto) {
         User owner = userRepository.findById(dto.getOwnerId())
                 .orElseThrow(() -> new IllegalArgumentException("Owner not found"));
 
