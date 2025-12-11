@@ -35,9 +35,10 @@ jobs:
         
       - name: Install & Test Frontend (Generate Coverage Report)
         working-directory: ./MEGA-frontend 
-        run: |
+        run:
+          npm cache clean --force
           npm install
-          npx react-scripts test --coverage --watchAll=false 
+          npm test -- --coverage --watchAll=false 
 
       # UNIFIED SONAR SCAN (Using Dedicated Action)
       - name: Analyze Code with SonarCloud Scanner
