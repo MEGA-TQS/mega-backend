@@ -10,7 +10,7 @@ on:
     branches:
       - "main"
       - "dev"
-
+  
 jobs:
   build:
     name: Build & Test
@@ -30,8 +30,3 @@ jobs:
       - name: Build with Maven
         working-directory: ./MEGA-backend
         run: mvn -B clean verify
-
-      - name: Update dependency graph
-        uses: advanced-security/maven-dependency-submission-action@v3
-        with:
-          directory: ./MEGA-backend

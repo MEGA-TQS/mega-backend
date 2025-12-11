@@ -6,7 +6,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class BlockDateDto {
+public class BlockDateDTO {
     @NotNull @FutureOrPresent
     private LocalDate startDate;
     

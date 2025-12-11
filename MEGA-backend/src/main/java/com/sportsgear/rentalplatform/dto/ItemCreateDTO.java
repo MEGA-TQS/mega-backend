@@ -5,7 +5,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class ItemCreateDto {
+public class ItemCreateDTO {
 
     @NotBlank(message = "Name is required")
     private String name;
