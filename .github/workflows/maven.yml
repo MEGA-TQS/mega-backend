@@ -10,7 +10,10 @@ on:
     branches:
       - "main"
       - "dev"
-
+      
+permissions:
+  contents: write
+  
 jobs:
   build:
     name: Build & Test
