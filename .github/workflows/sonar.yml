@@ -1,4 +1,4 @@
-name: SonarCloud Analysis
+name: SonarCloud Unified Analysis
 
 on:
   push:
@@ -20,42 +20,43 @@ jobs:
         with:
           fetch-depth: 0 
 
-      # SETUP JDK (Required for Java Build & Bytecode)
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-      
-      # BUILD PROJECTS (Crucial Prerequisite)
-      - name: Build Java Backend
-        working-directory: ./MEGA-backend
-        run: mvn -B verify
-        
-      - name: Install & Test Frontend (Generate Coverage Report)
-        working-directory: ./MEGA-frontend 
-        run: |
-          npm cache clean --force
-          npm install
-          npx react-scripts test --coverage --watchAll=false
 
-      # UNIFIED SONAR SCAN (Using Dedicated Action)
-      - name: Analyze Code with SonarCloud Scanner
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          # Arguments passed to the SonarScanner CLI:
-          args: >
-            -Dsonar.organization=${{ secrets.ORG_KEY }} 
-            -Dsonar.projectKey=${{ secrets.PROJ_KEY }} 
-            -Dsonar.host.url=https://sonarcloud.io 
-            
-            -Dsonar.sources=./MEGA-backend/src,./MEGA-frontend/src 
-            -Dsonar.tests=./MEGA-backend/src,./MEGA-frontend/src 
-            
-            -Dsonar.java.binaries=./MEGA-backend/target/classes 
-            
-            -Dsonar.javascript.lcov.reportPaths=./MEGA-frontend/coverage/lcov.info 
+          node-version: '20'
+          cache: 'npm'       
+
+      - name: Install Frontend Dependencies
+        working-directory: ./MEGA-frontend 
+        run: npm ci 
+
+      - name: Run Frontend Unit Tests (Generate Coverage Report)
+        working-directory: ./MEGA-frontend
+        run: |
+          export PATH=$PATH:$GITHUB_WORKSPACE/MEGA-frontend/node_modules/.bin
+          npm test -- --coverage --watchAll=false 
+
+      - name: Unified Build and Sonar Analysis
+        run: |
+          mvn -B verify -f ./MEGA-backend/pom.xml
+          
+          mvn -B sonar:sonar \
+            -Dsonar.organization=${{ secrets.ORG_KEY }} \
+            -Dsonar.projectKey=${{ secrets.PROJ_KEY }} \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.sources=./MEGA-backend/src,./MEGA-frontend/src \
+            -Dsonar.tests=./MEGA-backend/src,./MEGA-frontend/src \
+            -Dsonar.java.binaries=./MEGA-backend/target/classes \
+            -Dsonar.javascript.lcov.reportPaths=./MEGA-frontend/coverage/lcov.info \
             -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
+            
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+          SONAR_HOST_URL: https://sonarcloud.io
