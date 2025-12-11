@@ -35,4 +35,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice
     );
+
+    List<Item> findByOwnerId(Long ownerId);
 }

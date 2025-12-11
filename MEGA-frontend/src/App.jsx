@@ -1,38 +1,33 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
 import HomePage from './pages/HomePage';
 import ItemDetailsPage from './pages/ItemDetailsPage';
 import OwnerDashboard from './pages/OwnerDashboard';
 import MyBookingsPage from './pages/MyBookingsPage';
+import MyListingsPage from './pages/MyListingsPage';
+import ItemFormPage from './pages/ItemFormPage';
+import PaymentPage from './pages/PaymentPage';
+import BrowsePage from './pages/BrowsePage';
+import RegisterPage from './pages/RegisterPage';
+import Navbar from './components/Navbar';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
     <Router>
-      {/* Temporary Nav for Testing */}
-      <nav className="navbar navbar-expand navbar-light navbar-custom sticky-top mb-3">
-          <div className="container">
-              <Link className="navbar-brand d-flex align-items-center" to="/">
-                  {/* You can add a logo icon here later */}
-                  ⚡ MEGA
-              </Link>
-              <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                  <span className="navbar-toggler-icon"></span>
-              </button>
-              <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
-                  <div className="navbar-nav gap-3">
-                      <Link className="nav-link fw-bold text-dark" to="/">Explore</Link>
-                      <Link className="nav-link fw-bold text-dark" to="/my-bookings">My Bookings</Link>
-                      <Link className="nav-link fw-bold text-primary" to="/owner">Owner Dashboard</Link>
-                  </div>
-              </div>
-          </div>
-      </nav>
-
+      <Navbar />
       <Routes>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<HomePage />} />
+        <Route path="/browse" element={<BrowsePage />} />
         <Route path="/items/:id" element={<ItemDetailsPage />} />
         <Route path="/owner" element={<OwnerDashboard />} />
         <Route path="/my-bookings" element={<MyBookingsPage />} />
+        <Route path="/my-listings" element={<MyListingsPage />} />
+        <Route path="/items/new" element={<ItemFormPage />} />
+        <Route path="/items/edit/:id" element={<ItemFormPage />} />
+        <Route path="/payment/:bookingId" element={<PaymentPage />} />
       </Routes>
     </Router>
   );

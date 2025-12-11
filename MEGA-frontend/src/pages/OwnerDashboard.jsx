@@ -26,7 +26,7 @@ const OwnerDashboard = () => {
 
     return (
         <div className="container mt-4">
-            <h2>Owner Dashboard (US4)</h2>
+            <h2>Owner Dashboard</h2>
             <div className="list-group mt-3">
                 {requests.map(booking => (
                     <div key={booking.id} className="list-group-item d-flex justify-content-between align-items-center">

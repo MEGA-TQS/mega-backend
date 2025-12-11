@@ -50,6 +50,10 @@ public class ItemService {
         return itemRepository.findById(id);
     }
 
+    public List<Item> getItemsByOwner(Long ownerId) {
+        return itemRepository.findByOwnerId(ownerId);
+    }
+
     // US6: Create Listing
     public Item createItem(ItemCreateDTO dto) {
         User owner = userRepository.findById(dto.getOwnerId())
@@ -122,5 +126,14 @@ public class ItemService {
         block.getItems().add(bookingItem);
         
         bookingRepository.save(block);
+    }
+
+    public void deleteItem(Long id) {
+        Item item = itemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Item not found"));
+        
+        // Disable the item so it stops appearing in search
+        item.setActive(false); 
+        itemRepository.save(item);
     }
 }

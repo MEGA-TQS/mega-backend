@@ -16,6 +16,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -149,5 +151,32 @@ class ItemServiceTest {
 
         assertThrows(IllegalStateException.class, 
             () -> itemService.blockDates(itemId, LocalDate.now(), LocalDate.now().plusDays(2), ownerId));
+    }
+
+    // Delete Tests
+    @Test
+    void deleteItem_ShouldSoftDelete_WhenItemExists() {
+        // Given
+        Long itemId = 1L;
+        // Start with active = true
+        Item item = Item.builder().id(itemId).active(true).build();
+        
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(itemRepository.save(any(Item.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // When
+        itemService.deleteItem(itemId);
+
+        // Then
+        assertThat(item.isActive()).isFalse(); // Critical check: flag must be false
+        verify(itemRepository).save(item);     // Must save the change
+    }
+
+    @Test
+    void deleteItem_ShouldThrowException_WhenItemNotFound() {
+        Long itemId = 99L;
+        when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        assertThrows(RuntimeException.class, () -> itemService.deleteItem(itemId));
     }
 }
