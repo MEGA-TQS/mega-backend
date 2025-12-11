@@ -36,6 +36,7 @@ jobs:
       - name: Install & Test Frontend (Generate Coverage Report)
         working-directory: ./MEGA-frontend 
         run: |
+          export PATH=$PATH:./node_modules/.bin
           npm cache clean --force
           npm install
           npm test -- --coverage --watchAll=false 
