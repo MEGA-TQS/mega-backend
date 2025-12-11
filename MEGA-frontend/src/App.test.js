@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import App from '../App'; // Assuming your main component is App.jsx
+import App from './App'; // Assuming your main component is App.jsx
 
 test('renders the main application wrapper', () => {
   render(<App />);
