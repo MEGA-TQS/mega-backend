@@ -2,16 +2,16 @@ package com.sportsgear.rentalplatform.boundary;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sportsgear.rentalplatform.data.Item;
-import com.sportsgear.rentalplatform.dto.BlockDateDto;
-import com.sportsgear.rentalplatform.dto.ItemCreateDto;
-import com.sportsgear.rentalplatform.dto.ItemPriceUpdateDto;
+import com.sportsgear.rentalplatform.dto.BlockDateDTO;
+import com.sportsgear.rentalplatform.dto.ItemCreateDTO;
+import com.sportsgear.rentalplatform.dto.ItemPriceUpdateDTO;
 import com.sportsgear.rentalplatform.service.ItemService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -35,7 +35,7 @@ public class ItemControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean 
+    @MockitoBean 
     private ItemService itemService;
     
     @Autowired private ObjectMapper objectMapper;
@@ -113,7 +113,7 @@ public class ItemControllerTest {
     @Tag("US-6")
     public void whenCreateItemValid_thenReturn201() throws Exception {
         // GIVEN
-        ItemCreateDto dto = new ItemCreateDto();
+        ItemCreateDTO dto = new ItemCreateDTO();
         dto.setName("New Kayak");
         dto.setDescription("Brand new kayak, never used");
         dto.setCategory("Water Sports");
@@ -124,7 +124,7 @@ public class ItemControllerTest {
 
         Item savedItem = Item.builder().id(10L).name("New Kayak").build();
         
-        given(itemService.createItem(any(ItemCreateDto.class))).willReturn(savedItem);
+        given(itemService.createItem(any(ItemCreateDTO.class))).willReturn(savedItem);
 
         // WHEN & THEN
         mockMvc.perform(post("/api/items")
@@ -139,7 +139,7 @@ public class ItemControllerTest {
     @Tag("US-6")
     public void whenCreateItemInvalidPrice_thenReturn400() throws Exception {
         // GIVEN
-        ItemCreateDto dto = new ItemCreateDto();
+        ItemCreateDTO dto = new ItemCreateDTO();
         dto.setName("Bad Item");
         dto.setPricePerDay(new BigDecimal("-10.00")); // PREÇO NEGATIVO (Inválido)
 
@@ -153,7 +153,7 @@ public class ItemControllerTest {
     @Test
     @Tag("US-7")
     public void whenOwnerUpdatesPrice_thenReturn200() throws Exception {
-        ItemPriceUpdateDto dto = new ItemPriceUpdateDto();
+        ItemPriceUpdateDTO dto = new ItemPriceUpdateDTO();
         dto.setNewPrice(new BigDecimal("35.00"));
 
         Item updatedItem = Item.builder().id(1L).pricePerDay(new BigDecimal("35.00")).build();
@@ -171,7 +171,7 @@ public class ItemControllerTest {
     @Test
     @Tag("US-7")
     public void whenBlockDates_thenReturn200() throws Exception {
-        BlockDateDto dto = new BlockDateDto();
+        BlockDateDTO dto = new BlockDateDTO();
         dto.setStartDate(LocalDate.now().plusDays(5));
         dto.setEndDate(LocalDate.now().plusDays(7));
 

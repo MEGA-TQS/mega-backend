@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -30,7 +30,7 @@ public class BookingControllerTest {
     @Autowired private MockMvc mockMvc;
     @Autowired private ObjectMapper objectMapper; // Para converter Objetos -> JSON
     
-    @MockBean private BookingService bookingService; // @MockBean injeta automaticamente no contexto WebMvc
+    @MockitoBean private BookingService bookingService; // @MockBean injeta automaticamente no contexto WebMvc
 
     // US3: CREATE BOOKING (Validation)
 

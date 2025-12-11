@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class ItemPriceUpdateDto {
+public class ItemPriceUpdateDTO {
     @NotNull @Positive
     private BigDecimal newPrice;
 }
