@@ -37,7 +37,7 @@ jobs:
         working-directory: ./MEGA-frontend 
         run: |
           npm install
-          npm test -- --coverage --watchAll=false 
+          npx react-scripts test --coverage --watchAll=false 
 
       # UNIFIED SONAR SCAN (Using Dedicated Action)
       - name: Analyze Code with SonarCloud Scanner
