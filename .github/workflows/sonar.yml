@@ -36,9 +36,9 @@ jobs:
             -Dsonar.organization=${{ secrets.ORG_KEY }} \
             -Dsonar.projectKey=${{ secrets.PROJ_KEY }} \
             -Dsonar.java.binaries=target/classes
-            -Dsonar.host.url=https://sonarcloud.io
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
+          SONAR_HOST_URL: https://sonarcloud.io
 
       # JavaScript Frontend Setup and Analysis
       - name: Install Frontend Dependencies
@@ -60,6 +60,6 @@ jobs:
             -Dsonar.tests=src 
             -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js 
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info 
-            -Dsonar.host.url=https://sonarcloud.io
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
