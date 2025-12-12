@@ -51,7 +51,7 @@ const ItemDetailsPage = () => {
                     <p className="text-muted">{item.description}</p>
                     
                     <div className="card p-3 mt-4 bg-light">
-                        <h5>Request Booking (US3)</h5>
+                        <h5>Request Booking</h5>
                         <div className="mb-3">
                             <label>Start Date</label>
                             <input type="date" className="form-control" onChange={e => setStartDate(e.target.value)} />

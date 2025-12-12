@@ -1,69 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import ItemService from '../services/ItemService';
-import '../App.css'; // Make sure to import the CSS
+import SearchBar from '../components/SearchBar';
+import { CATEGORIES } from '../constants/categories'; // Ensure this path is correct
 
 const HomePage = () => {
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
-        ItemService.getAllItems()
-            .then(data => setItems(data))
-            .catch(err => console.log(err));
-    }, []);
-
-    // Helper to get random image based on category (since we don't have real uploads yet)
-    const getImage = (category) => {
-        if (category === 'Surf') return 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=500&q=60';
-        if (category === 'Cycling') return 'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?auto=format&fit=crop&w=500&q=60';
-        return 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=500&q=60';
-    };
-
     return (
         <div className="container mt-4">
             {/* HERO SECTION */}
-            <div className="hero-section">
-                <h1 className="display-4 fw-bold">Gear Up for Your Next Adventure</h1>
-                <p className="lead">Rent high-quality sports equipment from locals. Surf, Bike, Hike, and more.</p>
-                <div className="mt-4">
-                    <button className="btn btn-light btn-lg me-2 fw-bold text-dark">Browse All</button>
-                    <button className="btn btn-outline-light btn-lg fw-bold">List Your Gear</button>
+            <div className="hero-section position-relative mb-5" style={{
+                backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1517649763962-0c623066013b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80')`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                padding: '5rem 2rem',
+                borderRadius: '15px',
+                color: 'white',
+                textAlign: 'center'
+            }}>
+                <div className="position-relative z-1">
+                    <h1 className="display-4 fw-bold mb-4">Rent Gear. Go Outside.</h1>
+                    
+                    <div className="row justify-content-center">
+                        <div className="col-md-10">
+                            <SearchBar />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* CATALOG GRID */}
-            <h3 className="mb-4 fw-bold text-dark">Trending Now</h3>
-            <div className="row g-4">
-                {items.map(item => (
-                    <div key={item.id} className="col-md-4 col-sm-6">
-                        <div className="card item-card h-100">
-                            <div className="card-img-wrapper">
+            {/* CATEGORY HEADER ROW */}
+            <div className="d-flex justify-content-between align-items-center mb-3">
+                <h4 className="fw-bold m-0">Browse by Category</h4>
+                
+                {/* NEW: View All Button */}
+                <Link to="/browse" className="btn btn-outline-dark btn-sm fw-bold">
+                    View All Categories &rarr;
+                </Link>
+            </div>
+
+            {/* CATEGORY GRID */}
+            <div className="row g-3 mb-5">
+                {CATEGORIES.map(cat => (
+                    <div key={cat.name} className="col-6 col-md-4 col-lg-3">
+                        {/* Clicking this sets the URL to /browse?category=Surf */}
+                        <Link 
+                            to={`/browse?category=${encodeURIComponent(cat.name)}`} 
+                            className="text-decoration-none text-white"
+                        >
+                            <div className="card border-0 overflow-hidden text-white shadow-sm category-card">
                                 <img 
-                                    src={getImage(item.category)} 
-                                    className="card-img-top" 
-                                    alt={item.name} 
+                                    src={cat.img} 
+                                    className="card-img" 
+                                    alt={cat.name} 
+                                    style={{
+                                        height: '150px', 
+                                        objectFit: 'cover', 
+                                        filter: 'brightness(0.7)',
+                                        transition: 'transform 0.3s'
+                                    }} 
                                 />
-                                <span className="price-tag">€{item.pricePerDay}/day</span>
-                            </div>
-                            <div className="card-body d-flex flex-column">
-                                <div className="d-flex justify-content-between align-items-center mb-2">
-                                    <span className="category-badge">{item.category}</span>
-                                    <small className="text-muted">⭐ 4.8 (12)</small>
-                                </div>
-                                <h5 className="card-title fw-bold mb-1">{item.name}</h5>
-                                <p className="text-muted small mb-3 flex-grow-1">
-                                    {item.description.length > 60 
-                                        ? item.description.substring(0, 60) + '...' 
-                                        : item.description}
-                                </p>
-                                <div className="d-flex align-items-center justify-content-between mt-3">
-                                    <small className="text-muted">📍 {item.location}</small>
-                                    <Link to={`/items/${item.id}`} className="btn btn-primary-custom w-50 text-center text-decoration-none">
-                                        View
-                                    </Link>
+                                <div className="card-img-overlay d-flex align-items-center justify-content-center">
+                                    <h5 className="fw-bold text-center text-shadow">{cat.name}</h5>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 ))}
             </div>

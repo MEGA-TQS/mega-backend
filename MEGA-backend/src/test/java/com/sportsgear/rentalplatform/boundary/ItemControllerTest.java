@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*; 
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -184,5 +185,17 @@ public class ItemControllerTest {
                 .andExpect(status().isOk());
                 
         verify(itemService).blockDates(eq(1L), any(), any(), eq(1L));
+    }
+
+    @Test
+    void whenDeleteItem_thenReturn204() throws Exception {
+        Long itemId = 1L;
+        
+        // Mock the service call
+        doNothing().when(itemService).deleteItem(itemId);
+
+        // Perform DELETE request
+        mockMvc.perform(delete("/api/items/{id}", itemId))
+                .andExpect(status().isNoContent()); // Expect 204 No Content
     }
 }
