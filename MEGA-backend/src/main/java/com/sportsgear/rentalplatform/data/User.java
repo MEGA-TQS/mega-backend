@@ -3,8 +3,6 @@ package com.sportsgear.rentalplatform.data;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
-
 @Entity
 @Data
 @NoArgsConstructor
@@ -24,14 +22,9 @@ public class User {
 
     private String password;
 
-    private String phoneNumber;
+    private String phoneNumber;  // Keep this
+    private String address;      // Keep this
 
-    private String address;
-
-    // Based on "Hibernate: create table user_roles"
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
-    @Column(name = "roles")
-    private Set<Role> roles;
+    private Role role = Role.USER;  // Simple single role
 }

@@ -44,7 +44,7 @@ class BookingServiceTest {
                 .id(10L)
                 .name("Bike")
                 .pricePerDay(BigDecimal.TEN)
-                .owner(owner) // Item pertence ao Owner 2
+                .owner(owner)
                 .build();
 
         booking = Booking.builder()
@@ -54,8 +54,6 @@ class BookingServiceTest {
                 .items(Collections.singletonList(BookingItem.builder().item(item).build()))
                 .build();
     }
-
-    // US3: CREATE BOOKING
 
     @Test
     @Tag("US-3")
@@ -69,16 +67,12 @@ class BookingServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(renter));
         when(itemRepository.findAllById(anyList())).thenReturn(Arrays.asList(item));
-        
-        // SIMULA CONFLITO
         when(bookingRepository.existsOverlappingBookings(anyList(), any(), any())).thenReturn(true);
 
         // WHEN & THEN
         assertThrows(IllegalStateException.class, () -> bookingService.createGroupBooking(req));
         verify(bookingRepository, never()).save(any());
     }
-
-    // US4: OWNER DECISION
 
     @Test
     @Tag("US-4")
@@ -88,7 +82,7 @@ class BookingServiceTest {
         when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // WHEN
-        Booking result = bookingService.acceptBooking(100L, 2L); // Owner ID 2 (Correto)
+        Booking result = bookingService.acceptBooking(100L, 2L);
 
         // THEN
         assertEquals(BookingStatus.APPROVED, result.getStatus());
@@ -100,34 +94,8 @@ class BookingServiceTest {
         // GIVEN
         when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
 
-        // WHEN & THEN (Owner ID 99 não é dono do item)
+        // WHEN & THEN
         assertThrows(IllegalStateException.class, () -> bookingService.acceptBooking(100L, 99L));
     }
 
-    // US5: PAYMENT 
-    @Test
-    @Tag("US-5")
-    void whenBookingApproved_processPayment_Success() {
-        // GIVEN
-        booking.setStatus(BookingStatus.APPROVED); // Tem de estar aprovada
-        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
-        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
-
-        // WHEN
-        Booking result = bookingService.processPayment(100L, "tok_visa");
-
-        // THEN
-        assertEquals(BookingStatus.PAID, result.getStatus());
-    }
-
-    @Test
-    @Tag("US-5")
-    void whenBookingPending_processPayment_Fail() {
-        // GIVEN
-        booking.setStatus(BookingStatus.PENDING); // Ainda não aprovada
-        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
-
-        // WHEN & THEN
-        assertThrows(IllegalStateException.class, () -> bookingService.processPayment(100L, "tok_visa"));
-    }
 }

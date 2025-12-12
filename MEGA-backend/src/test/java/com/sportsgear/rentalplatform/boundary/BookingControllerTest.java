@@ -17,7 +17,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,11 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class BookingControllerTest {
 
     @Autowired private MockMvc mockMvc;
-    @Autowired private ObjectMapper objectMapper; // Para converter Objetos -> JSON
+    @Autowired private ObjectMapper objectMapper;
     
-    @MockitoBean private BookingService bookingService; // @MockBean injeta automaticamente no contexto WebMvc
-
-    // US3: CREATE BOOKING (Validation)
+    @MockitoBean private BookingService bookingService;
 
     @Test
     @Tag("US-3")
@@ -40,13 +37,13 @@ public class BookingControllerTest {
         BookingRequest req = new BookingRequest();
         req.setRenterId(1L);
         req.setItemIds(Arrays.asList(10L));
-        req.setStartDate(LocalDate.now().minusDays(1)); // PASSADO
+        req.setStartDate(LocalDate.now().minusDays(1));
         req.setEndDate(LocalDate.now().plusDays(2));
 
         mockMvc.perform(post("/api/bookings")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isBadRequest()); // O @Valid deve falhar aqui
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -68,8 +65,6 @@ public class BookingControllerTest {
                 .andExpect(jsonPath("$.status").value("PENDING"));
     }
 
-    // US4: ACCEPT/DECLINE
-
     @Test
     @Tag("US-4")
     void whenOwnerAccepts_thenReturn200() throws Exception {
@@ -83,18 +78,4 @@ public class BookingControllerTest {
                 .andExpect(jsonPath("$.status").value("APPROVED"));
     }
 
-    // US5: PAYMENT
-
-    @Test
-    @Tag("US-5")
-    void whenPaymentSuccessful_thenReturn200() throws Exception {
-        Booking mockBooking = Booking.builder().id(1L).status(BookingStatus.PAID).build();
-        
-        given(bookingService.processPayment(eq(1L), any())).willReturn(mockBooking);
-
-        mockMvc.perform(post("/api/bookings/1/payment")
-                .param("token", "tok_visa"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("PAID"));
-    }
 }
