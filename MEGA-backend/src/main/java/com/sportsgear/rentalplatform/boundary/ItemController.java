@@ -50,6 +50,12 @@ public class ItemController {
                    .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
+        itemService.deleteItem(id);
+        return ResponseEntity.noContent().build();
+    }
+
     // Create item listing
     // POST /api/items
     @PostMapping
@@ -94,5 +100,10 @@ public class ItemController {
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build(); // 400 se já estiver ocupado
         }
+    }
+
+    @GetMapping("/owner/{ownerId}")
+    public List<Item> getItemsByOwner(@PathVariable Long ownerId) {
+        return itemService.getItemsByOwner(ownerId);
     }
 }
