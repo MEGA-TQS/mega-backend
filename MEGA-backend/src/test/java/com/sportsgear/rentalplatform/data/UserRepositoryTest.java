@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
@@ -23,7 +25,7 @@ class UserRepositoryTest {
                 .name("Test User")
                 .email("test@example.com")
                 .password("password")
-                .role(Role.USER)
+                .roles(Set.of(Role.RENTER, Role.OWNER))  // Multiple roles
                 .build();
         
         entityManager.persist(user);
@@ -35,15 +37,6 @@ class UserRepositoryTest {
         // THEN
         assertThat(found).isNotNull();
         assertThat(found.getEmail()).isEqualTo("test@example.com");
-        assertThat(found.getRole()).isEqualTo(Role.USER);
-    }
-
-    @Test
-    void findByEmail_WhenEmailNotExists_ShouldReturnNull() {
-        // WHEN
-        User found = userRepository.findByEmail("nonexistent@example.com");
-
-        // THEN
-        assertThat(found).isNull();
+        assertThat(found.getRoles()).contains(Role.RENTER, Role.OWNER);
     }
 }

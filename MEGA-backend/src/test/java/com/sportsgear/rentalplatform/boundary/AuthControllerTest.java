@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Set;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,7 +38,7 @@ public class AuthControllerTest {
                 .email("test@example.com")
                 .password("password123")
                 .name("Test User")
-                .role(Role.USER)
+                .roles(Set.of(Role.RENTER))  // Changed from USER to RENTER
                 .build();
 
         given(userRepository.findByEmail("test@example.com")).willReturn(user);
@@ -51,7 +53,7 @@ public class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(1))
                 .andExpect(jsonPath("$.token").value("1"))
-                .andExpect(jsonPath("$.role").value("USER"));
+                .andExpect(jsonPath("$.role").value("RENTER"));  // Changed from USER to RENTER
     }
 
     @Test
@@ -94,7 +96,7 @@ public class AuthControllerTest {
                 .name("New User")
                 .email("new@example.com")
                 .password("password123")
-                .role(Role.USER)
+                .roles(Set.of(Role.RENTER))  // Changed from USER to RENTER
                 .build();
 
         User savedUser = User.builder()
@@ -102,7 +104,7 @@ public class AuthControllerTest {
                 .name("New User")
                 .email("new@example.com")
                 .password("password123")
-                .role(Role.USER)
+                .roles(Set.of(Role.RENTER))  // Changed from USER to RENTER
                 .build();
 
         given(userRepository.findByEmail("new@example.com")).willReturn(null);
