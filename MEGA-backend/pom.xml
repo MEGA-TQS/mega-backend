@@ -14,6 +14,7 @@
     <description>MEGA - Multisport Equipment Gear App (TQS Project)</description>
     <properties>
         <java.version>21</java.version>
+        <sonar.organization>mega-tqs</sonar.organization>
     </properties>
     <dependencies>
         <dependency>
