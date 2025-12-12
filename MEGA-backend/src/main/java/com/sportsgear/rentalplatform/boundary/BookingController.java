@@ -68,21 +68,4 @@ public class BookingController {
 
     
     // ... }
-
-    // US5 - Pagar Reserva
-    // POST /api/bookings/10/payment?token=tok_visa
-    @PostMapping("/{id}/payment")
-    public ResponseEntity<Booking> processPayment(
-            @PathVariable Long id,
-            @RequestParam(required = false, defaultValue = "tok_visa") String token) {
-        
-        try {
-            Booking booking = bookingService.processPayment(id, token);
-            return ResponseEntity.ok(booking);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); 
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(null); 
-        }
-    }
 }
