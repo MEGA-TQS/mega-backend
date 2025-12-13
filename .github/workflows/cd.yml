@@ -18,6 +18,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Build backend JAR
+        working-directory: MEGA-backend
+        run: mvn clean package -DskipTests
+
       - name: Build backend Docker image
         run: |
           docker build \
