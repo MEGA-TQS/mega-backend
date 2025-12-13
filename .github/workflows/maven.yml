@@ -28,7 +28,7 @@ jobs:
           cache: maven
 
       - name: Build & Test with JaCoCo
-        run: mvn clean verify -Pcoverage
+        run: mvn clean verify 
 
       - name: Enforce Coverage Threshold
         run: |
