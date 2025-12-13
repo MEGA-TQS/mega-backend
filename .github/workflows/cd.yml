@@ -36,6 +36,12 @@ jobs:
           distribution: 'temurin'
           cache: maven  
 
+      - name: Debug Java version
+        run: |
+          java -version
+          javac -version
+          echo "JAVA_HOME=$JAVA_HOME"
+
 
       - name: Push image
         run: docker push ghcr.io/mega-tqs/mega-backend:latest
