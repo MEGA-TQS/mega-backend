@@ -19,7 +19,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build backend Docker image
-        run: docker build -t ghcr.io/mega-tqs/mega-backend:latest .
+        run: |
+          docker build \
+            -t ghcr.io/mega-tqs/mega-backend:latest \
+            -f MEGA-backend/Dockerfile \
+            MEGA-backend
+
 
       - name: Push image
         run: docker push ghcr.io/mega-tqs/mega-backend:latest
