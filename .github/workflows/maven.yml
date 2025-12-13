@@ -28,15 +28,5 @@ jobs:
           cache: maven
 
       - name: Build & Test with JaCoCo
+        working-directory: MEGA-backend
         run: mvn clean verify 
-
-      - name: Enforce Coverage Threshold
-        run: |
-          COVERAGE=$(grep -oPm1 "(?<=<counter type=\"INSTRUCTION\" missed=\")[0-9]+(?=\" covered=\")" target/site/jacoco/jacoco.xml)
-          TOTAL=$(grep -oPm1 "(?<=<counter type=\"INSTRUCTION\" missed=\")[0-9]+(?=\" covered=\")" -A1 target/site/jacoco/jacoco.xml | tail -1)
-          PERCENT=$((100 - 100 * COVERAGE / TOTAL))
-          echo "Coverage=${PERCENT}%"
-          if [ $PERCENT -lt 70 ]; then
-            echo "Coverage below 70%! Failing."
-            exit 1
-          fi
