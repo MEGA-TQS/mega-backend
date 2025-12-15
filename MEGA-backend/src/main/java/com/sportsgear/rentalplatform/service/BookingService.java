@@ -41,12 +41,17 @@ public class BookingService {
         if (hasConflict) {
             throw new IllegalStateException("Selected items are not available for the requested dates.");
         }
+        
+        boolean isInstantBooking = itemsToRent.stream()
+                .allMatch(Item::isInstantBookable);
+
+        BookingStatus initialStatus = isInstantBooking ? BookingStatus.APPROVED : BookingStatus.PENDING;
 
         Booking booking = Booking.builder()
                 .renter(renter)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
-                .status(BookingStatus.PENDING)
+                .status(initialStatus)
                 .items(new ArrayList<>())
                 .build();
 
