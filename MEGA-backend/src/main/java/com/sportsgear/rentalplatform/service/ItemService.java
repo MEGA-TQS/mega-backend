@@ -69,6 +69,7 @@ public class ItemService {
                 .imageUrl(dto.getImageUrl())        
                 .technicalSpecs(dto.getTechnicalSpecs())
                 .pickupRules(dto.getPickupRules())
+                .instantBookable(dto.isInstantBookable())
                 .owner(owner)                       
                 .active(true)                       
                 .build();
@@ -136,4 +137,6 @@ public class ItemService {
         item.setActive(false); 
         itemRepository.save(item);
     }
+
+
 }

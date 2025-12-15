@@ -34,4 +34,6 @@ public class ItemCreateDTO {
 
     @NotNull(message = "Owner ID is required")
     private Long ownerId;
+
+    private boolean instantBookable;
 }
