@@ -228,4 +228,64 @@ class BookingServiceTest {
         // Verificamos se a mensagem de erro é a correta
         assertEquals("Selected items are not available for the requested dates.", exception.getMessage());
     }
+
+    @Test
+    @Tag("US-10")
+    void whenBookingMultipleItems_thenTotalIsSumOfAll() {
+        // GIVEN: Um pedido com 2 itens
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Arrays.asList(10L, 20L)); // Dois itens
+        req.setStartDate(LocalDate.now().plusDays(1));
+        req.setEndDate(LocalDate.now().plusDays(3)); // 2 dias de aluguer
+
+        // Mock Item 1 ( 20€/dia)
+        Item item1 = Item.builder().id(10L).pricePerDay(new BigDecimal("20.00")).active(true).build();
+        // Mock Item 2 (10€/dia)
+        Item item2 = Item.builder().id(20L).pricePerDay(new BigDecimal("10.00")).active(true).build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        // O repositório devolve os dois itens
+        when(itemRepository.findAllById(req.getItemIds())).thenReturn(Arrays.asList(item1, item2));
+        // Disponibilidade OK para ambos
+        when(bookingRepository.existsOverlappingBookings(anyList(), any(), any())).thenReturn(false);
+        // Capturar o que vai ser salvo
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.createGroupBooking(req);
+
+        // THEN
+        assertNotNull(result);
+        assertEquals(2, result.getItems().size()); // Tem 2 itens na lista
+
+        BigDecimal expectedTotal = new BigDecimal("60.00"); 
+        assertEquals(0, expectedTotal.compareTo(result.getTotalPrice())); 
+    }
+
+    @Test
+    @Tag("US-10")
+    void whenOneItemOfMultipleIsUnavailable_thenFailTransaction() {
+        // GIVEN: Pedido para 2 itens
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Arrays.asList(10L, 20L));
+        req.setStartDate(LocalDate.now().plusDays(1));
+        req.setEndDate(LocalDate.now().plusDays(3));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        when(itemRepository.findAllById(anyList())).thenReturn(Arrays.asList(new Item(), new Item()));
+
+        // SIMULAÇÃO DO ERRO: O repositório diz que HÁ conflito (num deles ou nos dois)
+        when(bookingRepository.existsOverlappingBookings(
+                anyList(), any(), any()
+        )).thenReturn(true); 
+
+        // WHEN & THEN
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            bookingService.createGroupBooking(req);
+        });
+
+        assertEquals("Selected items are not available for the requested dates.", exception.getMessage());
+    }
 }
