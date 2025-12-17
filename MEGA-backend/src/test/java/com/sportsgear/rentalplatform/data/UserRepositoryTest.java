@@ -1,5 +1,6 @@
 package com.sportsgear.rentalplatform.data;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -19,6 +20,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
+    @Tag("US-10")
     void findByEmail_ShouldReturnUser() {
         // GIVEN
         User user = User.builder()

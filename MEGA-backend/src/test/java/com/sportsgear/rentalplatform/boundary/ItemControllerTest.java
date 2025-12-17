@@ -188,6 +188,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-6")
     void whenDeleteItem_thenReturn204() throws Exception {
         Long itemId = 1L;
         

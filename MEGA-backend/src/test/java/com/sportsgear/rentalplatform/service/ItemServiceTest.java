@@ -2,6 +2,8 @@ package com.sportsgear.rentalplatform.service;
 
 import com.sportsgear.rentalplatform.data.*;
 import com.sportsgear.rentalplatform.dto.ItemCreateDTO;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,6 +40,7 @@ class ItemServiceTest {
     // Search Tests
 
     @Test
+    @Tag("US-1")
     void search_ShouldDelegateToRepository() {
         String category = "Water";
         LocalDate start = LocalDate.now();
@@ -54,6 +57,7 @@ class ItemServiceTest {
     // Create Item Tests
 
     @Test
+    @Tag("US-6")
     void createItem_ShouldSucceed_WhenOwnerExists() {
         Long ownerId = 10L;
         User owner = User.builder().id(ownerId).name("Alberto").build();
@@ -79,6 +83,7 @@ class ItemServiceTest {
     }
 
     @Test
+    @Tag("US-6")
     void createItem_ShouldThrowException_WhenOwnerNotFound() {
         Long ownerId = 99L;
         when(userRepository.findById(ownerId)).thenReturn(Optional.empty());
@@ -92,6 +97,7 @@ class ItemServiceTest {
     // --- Update Price Tests ---
 
     @Test
+    @Tag("US-7")
     void updatePrice_ShouldSucceed_WhenCallerIsOwner() {
         Long itemId = 1L;
         Long ownerId = 5L;
@@ -108,6 +114,7 @@ class ItemServiceTest {
     }
 
     @Test
+    @Tag("US-7")
     void updatePrice_ShouldThrowException_WhenCallerIsNotOwner() {
         Long itemId = 1L;
         Long ownerId = 5L;
@@ -125,6 +132,7 @@ class ItemServiceTest {
     // --- Block Dates Tests ---
 
     @Test
+    @Tag("US-7")
     void blockDates_ShouldSucceed_WhenNoOverlap() {
         Long itemId = 1L;
         Long ownerId = 5L;
@@ -140,6 +148,7 @@ class ItemServiceTest {
     }
 
     @Test
+    @Tag("US-7")
     void blockDates_ShouldThrowException_WhenDatesOverlap() {
         Long itemId = 1L;
         Long ownerId = 5L;
@@ -155,6 +164,7 @@ class ItemServiceTest {
 
     // Delete Tests
     @Test
+    @Tag("US-6")
     void deleteItem_ShouldSoftDelete_WhenItemExists() {
         // Given
         Long itemId = 1L;
@@ -173,6 +183,7 @@ class ItemServiceTest {
     }
 
     @Test
+    @Tag("US-6")
     void deleteItem_ShouldThrowException_WhenItemNotFound() {
         Long itemId = 99L;
         when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
