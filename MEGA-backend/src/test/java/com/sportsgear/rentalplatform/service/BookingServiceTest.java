@@ -1,7 +1,7 @@
 package com.sportsgear.rentalplatform.service;
 
 import com.sportsgear.rentalplatform.data.*;
-import com.sportsgear.rentalplatform.data.BookingRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -98,4 +98,59 @@ class BookingServiceTest {
         assertThrows(IllegalStateException.class, () -> bookingService.acceptBooking(100L, 99L));
     }
 
+    @Test
+    @Tag("US-8")
+    void whenAllItemsAreInstantBookable_thenStatusIsApproved() {
+        // GIVEN
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Collections.singletonList(10L));
+        req.setStartDate(LocalDate.now().plusDays(1));
+        req.setEndDate(LocalDate.now().plusDays(3));
+
+        Item instantItem = Item.builder()
+                .id(10L)
+                .pricePerDay(BigDecimal.TEN)
+                .instantBookable(true) 
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        when(itemRepository.findAllById(anyList())).thenReturn(Collections.singletonList(instantItem));
+        when(bookingRepository.existsOverlappingBookings(anyList(), any(), any())).thenReturn(false);
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.createGroupBooking(req);
+
+        // THEN
+        assertEquals(BookingStatus.APPROVED, result.getStatus()); 
+    }
+
+    @Test
+    @Tag("US-8")
+    void whenItemIsNotInstant_thenStatusIsPending() {
+        // GIVEN
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Collections.singletonList(10L));
+        req.setStartDate(LocalDate.now().plusDays(1));
+        req.setEndDate(LocalDate.now().plusDays(3));
+
+        Item normalItem = Item.builder()
+                .id(10L)
+                .pricePerDay(BigDecimal.TEN)
+                .instantBookable(false) 
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        when(itemRepository.findAllById(anyList())).thenReturn(Collections.singletonList(normalItem));
+        when(bookingRepository.existsOverlappingBookings(anyList(), any(), any())).thenReturn(false);
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.createGroupBooking(req);
+
+        // THEN
+        assertEquals(BookingStatus.PENDING, result.getStatus()); 
+    }
 }
