@@ -78,4 +78,23 @@ public class BookingControllerTest {
                 .andExpect(jsonPath("$.status").value("APPROVED"));
     }
 
+    @Test
+    @Tag("US-9")
+    void whenValidFutureDate_thenReturn201() throws Exception {
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Arrays.asList(10L));
+        // Data futura válida (AC: "weeks/months ahead")
+        req.setStartDate(LocalDate.now().plusMonths(2)); 
+        req.setEndDate(LocalDate.now().plusMonths(2).plusDays(3));
+
+        Booking mockBooking = Booking.builder().status(BookingStatus.PENDING).build();
+        given(bookingService.createGroupBooking(any())).willReturn(mockBooking);
+
+        mockMvc.perform(post("/api/bookings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isCreated());
+    }
+
 }

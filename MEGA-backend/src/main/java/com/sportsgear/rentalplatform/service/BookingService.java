@@ -1,6 +1,7 @@
 package com.sportsgear.rentalplatform.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,13 @@ public class BookingService {
         User renter = userRepository.findById(request.getRenterId())
                 .orElseThrow(() -> new IllegalArgumentException("Renter not found with ID: " + request.getRenterId()));
 
+        
+
+        // Regra: Não permitir reservas com mais de 1 ano de antecedência
+        if (request.getStartDate().isAfter(LocalDate.now().plusYears(1))) {
+            throw new IllegalArgumentException("Bookings can only be made up to 1 year in advance.");
+        }
+        
         List<Item> itemsToRent = itemRepository.findAllById(request.getItemIds());
 
         if (itemsToRent.size() != request.getItemIds().size()) {

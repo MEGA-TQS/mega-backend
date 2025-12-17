@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -152,5 +153,79 @@ class BookingServiceTest {
 
         // THEN
         assertEquals(BookingStatus.PENDING, result.getStatus()); 
+    }
+
+    @Test
+    @Tag("US-9")
+    void whenBookingMonthsInAdvance_thenSuccess() {
+        // GIVEN: Uma reserva para daqui a 6 meses
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Collections.singletonList(10L));
+        req.setStartDate(LocalDate.now().plusMonths(6)); // Futuro distante
+        req.setEndDate(LocalDate.now().plusMonths(6).plusDays(5));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        when(itemRepository.findAllById(anyList())).thenReturn(Collections.singletonList(item));
+        when(bookingRepository.existsOverlappingBookings(anyList(), any(), any())).thenReturn(false); // Disponível
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.createGroupBooking(req);
+
+        // THEN
+        assertNotNull(result);
+        assertEquals(BookingStatus.PENDING, result.getStatus()); // AC: Request sent to owner
+        assertEquals(req.getStartDate(), result.getStartDate());
+    }
+
+    @Test
+    @Tag("US-9")
+    void whenBookingTooFarInFuture_thenThrowException() {
+        // GIVEN: Uma reserva para daqui a 2 anos (inválida pela nossa regra)
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Collections.singletonList(10L));
+        req.setStartDate(LocalDate.now().plusYears(2)); 
+        req.setEndDate(LocalDate.now().plusYears(2).plusDays(5));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+
+        // WHEN & THEN
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            bookingService.createGroupBooking(req);
+        });
+
+        assertTrue(exception.getMessage().contains("up to 1 year"));
+    }
+
+    @Test
+    @Tag("US-9")
+    void whenBookingFutureDateAlreadyOccupied_thenThrowException() {
+        // GIVEN: Uma tentativa de reserva para daqui a 3 meses
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(2L);
+        req.setItemIds(Collections.singletonList(10L));
+        req.setStartDate(LocalDate.now().plusMonths(3));
+        req.setEndDate(LocalDate.now().plusMonths(3).plusDays(5));
+
+        // Mock dos repositórios
+        when(userRepository.findById(2L)).thenReturn(Optional.of(new User()));
+        when(itemRepository.findAllById(anyList())).thenReturn(Collections.singletonList(item));
+
+        // O repositório diz que JÁ EXISTE uma reserva nessas datas
+        when(bookingRepository.existsOverlappingBookings(
+                anyList(), 
+                eq(req.getStartDate()), 
+                eq(req.getEndDate())
+        )).thenReturn(true); 
+
+        // WHEN & THEN
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            bookingService.createGroupBooking(req);
+        });
+
+        // Verificamos se a mensagem de erro é a correta
+        assertEquals("Selected items are not available for the requested dates.", exception.getMessage());
     }
 }
