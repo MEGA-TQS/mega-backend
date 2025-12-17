@@ -198,4 +198,20 @@ public class ItemControllerTest {
         mockMvc.perform(delete("/api/items/{id}", itemId))
                 .andExpect(status().isNoContent()); // Expect 204 No Content
     }
+
+    @Test
+    @Tag("US-11")
+    public void whenItemIsSeasonallyBlocked_thenItShouldNotAppearInSearch() throws Exception {
+        
+        // GIVEN: Serviço devolve lista vazia porque o item está bloqueado naquelas datas
+        given(itemService.search(any(), any(), any(), any(), any(), any(), any()))
+                .willReturn(Collections.emptyList());
+
+        mockMvc.perform(get("/api/items")
+                .param("startDate", "2025-12-01") // Início da época bloqueada
+                .param("endDate", "2025-12-05")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isEmpty()); // Lista vazia
+    }
 }

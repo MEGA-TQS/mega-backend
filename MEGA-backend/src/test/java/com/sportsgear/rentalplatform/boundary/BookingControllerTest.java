@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.time.LocalDate;
 import java.util.Arrays;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -76,6 +77,41 @@ public class BookingControllerTest {
                 .param("ownerId", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
+    @Test
+    @Tag("US-8") // Serve para US9 e US10 também
+    public void whenPostValidBooking_thenReturn201() throws Exception {
+        BookingRequest request = new BookingRequest();
+        request.setRenterId(1L);
+        request.setItemIds(Arrays.asList(10L, 20L)); // US10 (Multi-item)
+        request.setStartDate(LocalDate.now().plusDays(5)); // US9 (Future)
+        request.setEndDate(LocalDate.now().plusDays(7));
+
+        // Mock do retorno do Service
+        Booking mockBooking = Booking.builder()
+                .id(100L)
+                .status(BookingStatus.PENDING) // Ou APPROVED se fosse US8 instant
+                .build();
+
+        given(bookingService.createGroupBooking(any(BookingRequest.class))).willReturn(mockBooking);
+
+        mockMvc.perform(post("/api/bookings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated()) // Espera HTTP 201
+                .andExpect(jsonPath("$.id", is(100)));
+    }
+    
+    // Teste de Erro (Validation)
+    @Test
+    public void whenPostInvalidBooking_thenReturn400() throws Exception {
+        BookingRequest request = new BookingRequest();
+        // Falta renterId e dates -> Inválido
+        
+        mockMvc.perform(post("/api/bookings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest()); // Espera HTTP 400
     }
 
     @Test
