@@ -288,4 +288,58 @@ class BookingServiceTest {
 
         assertEquals("Selected items are not available for the requested dates.", exception.getMessage());
     }
+
+    @Test
+    void updateStatus_ShouldCancel_WhenRenterRequests() {
+        // GIVEN
+        User renter = User.builder().id(1L).build();
+        
+        Booking booking = Booking.builder()
+                .id(100L)
+                .renter(renter)
+                .status(BookingStatus.PENDING)
+                .startDate(LocalDate.now().plusDays(5)) // <--- CORREÇÃO: Data futura (obrigatório)
+                .items(new java.util.ArrayList<>())     // (Mantém a lista que corrigimos antes)
+                .build();
+        
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.updateStatus(100L, BookingStatus.CANCELLED, 1L);
+
+        // THEN
+        assertEquals(BookingStatus.CANCELLED, result.getStatus());
+    }
+
+    @Test
+    void updateStatus_ShouldThrow_WhenRandomUserTriesToCancel() {
+        // GIVEN
+        User renter = User.builder().id(1L).build();
+        User owner = User.builder().id(2L).build(); // Item owner
+        Item item = Item.builder().owner(owner).build();
+        
+        Booking booking = Booking.builder()
+                .id(100L)
+                .renter(renter)
+                .items(Collections.singletonList(BookingItem.builder().item(item).build()))
+                .build();
+        
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN: User 99 (Hacker) tries to cancel
+        assertThrows(IllegalStateException.class, () -> 
+            bookingService.updateStatus(100L, BookingStatus.CANCELLED, 99L));
+    }
+
+    @Test
+    void updateStatus_ShouldThrow_WhenTryingToSetPAIDManually() {
+        // GIVEN
+        Booking booking = Booking.builder().id(100L).build();
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN & THEN
+        assertThrows(IllegalStateException.class, () -> 
+            bookingService.updateStatus(100L, BookingStatus.PAID, 1L));
+    }
 }

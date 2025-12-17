@@ -20,6 +20,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "item_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore 
     private Item item;
 
     @ManyToOne

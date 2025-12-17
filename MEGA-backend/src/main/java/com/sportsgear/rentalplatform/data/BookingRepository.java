@@ -14,10 +14,18 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     // History
     List<Booking> findByRenterId(Long renterId);
 
+    @Query("SELECT DISTINCT b FROM Booking b " +
+           "JOIN b.items bi " +
+           "JOIN bi.item i " +
+           "WHERE i.owner.id = :ownerId " +
+           "ORDER BY b.startDate DESC")
+    List<Booking> findBookingsByOwner(@Param("ownerId") Long ownerId);
+    
+    
     @Query("SELECT COUNT(b) > 0 FROM Booking b "
             + "JOIN b.items bi "
             + "WHERE bi.item.id IN :itemIds "
-            + "AND b.status <> 'CANCELLED' "
+            + "AND b.status <> 'CANCELLED' " // Ignora reservas canceladas
             + "AND (b.endDate > :startDate AND b.startDate < :endDate)")
     boolean existsOverlappingBookings(
             @Param("itemIds") List<Long> itemIds,

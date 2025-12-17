@@ -263,4 +263,33 @@ class ItemServiceTest {
         assertEquals(startWinter, savedBlock.getStartDate());
         assertEquals(endWinter, savedBlock.getEndDate());
     }
+
+    @Test
+    void addReview_ShouldSucceed_WhenUserAndItemExist() {
+        // GIVEN
+        Long itemId = 1L;
+        Long userId = 2L;
+        
+        Item item = Item.builder().id(itemId).build();
+        User user = User.builder().id(userId).build();
+        
+        com.sportsgear.rentalplatform.dto.ReviewDTO dto = new com.sportsgear.rentalplatform.dto.ReviewDTO();
+        dto.setReviewerId(userId);
+        dto.setRating(5);
+        dto.setComment("Great!");
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+        // WHEN
+        com.sportsgear.rentalplatform.data.Review result = itemService.addReview(itemId, dto);
+
+        // THEN
+        assertNotNull(result);
+        assertEquals(5, result.getRating());
+        assertEquals("Great!", result.getComment());
+        assertEquals(user, result.getReviewer());
+        
+        verify(itemRepository).save(item);
+    }
 }

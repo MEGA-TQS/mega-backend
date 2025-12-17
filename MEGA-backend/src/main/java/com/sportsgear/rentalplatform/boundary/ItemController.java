@@ -106,4 +106,16 @@ public class ItemController {
     public List<Item> getItemsByOwner(@PathVariable Long ownerId) {
         return itemService.getItemsByOwner(ownerId);
     }
+
+    @PostMapping("/{itemId}/reviews")
+    public ResponseEntity<com.sportsgear.rentalplatform.data.Review> addReview(
+            @PathVariable Long itemId, 
+            @RequestBody com.sportsgear.rentalplatform.dto.ReviewDTO reviewDto) {
+        try {
+            com.sportsgear.rentalplatform.data.Review review = itemService.addReview(itemId, reviewDto);
+            return ResponseEntity.ok(review);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
