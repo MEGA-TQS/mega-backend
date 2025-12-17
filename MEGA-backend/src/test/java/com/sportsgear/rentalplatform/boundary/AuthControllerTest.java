@@ -137,4 +137,31 @@ public class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(newUser)))
                 .andExpect(status().isConflict());
     }
+
+    @Test
+    void register_DefaultRoleAssigned() throws Exception {
+
+        User newUserNoRole = User.builder()
+                .name("No Role User")
+                .email("norole@example.com")
+                .password("password123")
+                .build(); // roles is null/empty by default
+
+        User savedUser = User.builder()
+                .id(3L)
+                .name("No Role User")
+                .email("norole@example.com")
+                .password("password123")
+                .roles(Set.of(Role.RENTER)) // The DB would return the user with the role set
+                .build();
+
+        given(userRepository.findByEmail("norole@example.com")).willReturn(null);
+        given(userRepository.save(any(User.class))).willReturn(savedUser);
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(newUserNoRole)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("RENTER"));
+    }
 }

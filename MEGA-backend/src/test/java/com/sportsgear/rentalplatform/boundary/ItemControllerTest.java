@@ -8,6 +8,7 @@ import com.sportsgear.rentalplatform.dto.ItemPriceUpdateDTO;
 import com.sportsgear.rentalplatform.service.ItemService;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
@@ -152,6 +153,21 @@ public class ItemControllerTest {
     }
 
     @Test
+    public void whenCreateItemOwnerNotFound_thenReturn400() throws Exception {
+        ItemCreateDTO dto = new ItemCreateDTO();
+        dto.setName("Kayak");
+        dto.setPricePerDay(new BigDecimal("10.00"));
+        dto.setOwnerId(999L); // ID que não existe
+
+        given(itemService.createItem(any())).willThrow(new IllegalArgumentException("Owner not found"));
+
+        mockMvc.perform(post("/api/items")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @Tag("US-7")
     public void whenOwnerUpdatesPrice_thenReturn200() throws Exception {
         ItemPriceUpdateDTO dto = new ItemPriceUpdateDTO();
@@ -170,6 +186,37 @@ public class ItemControllerTest {
     }
 
     @Test
+    public void whenUpdatePriceNotOwner_thenReturn403() throws Exception {
+        ItemPriceUpdateDTO dto = new ItemPriceUpdateDTO();
+        dto.setNewPrice(new BigDecimal("50.00"));
+
+        // Service throws IllegalStateException when user is not the owner
+        given(itemService.updatePrice(eq(1L), any(), eq(2L)))
+            .willThrow(new IllegalStateException("User is not the owner"));
+
+        mockMvc.perform(patch("/api/items/1/price")
+                .param("ownerId", "2") // Wrong owner
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isForbidden()); // 403
+    }
+
+    @Test
+    public void whenUpdatePriceItemNotFound_thenReturn404() throws Exception {
+        ItemPriceUpdateDTO dto = new ItemPriceUpdateDTO();
+        dto.setNewPrice(new BigDecimal("50.00"));
+
+        given(itemService.updatePrice(eq(999L), any(), eq(1L)))
+            .willThrow(new IllegalArgumentException("Item not found"));
+
+        mockMvc.perform(patch("/api/items/999/price")
+                .param("ownerId", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @Tag("US-7")
     public void whenBlockDates_thenReturn200() throws Exception {
         BlockDateDTO dto = new BlockDateDTO();
@@ -185,6 +232,22 @@ public class ItemControllerTest {
                 .andExpect(status().isOk());
                 
         verify(itemService).blockDates(eq(1L), any(), any(), eq(1L));
+    }
+
+    @Test
+    public void whenBlockDatesConflict_thenReturn400() throws Exception {
+        BlockDateDTO dto = new BlockDateDTO();
+        dto.setStartDate(LocalDate.now());
+        dto.setEndDate(LocalDate.now().plusDays(1));
+
+        BDDMockito.willThrow(new IllegalStateException("Dates already occupied"))
+            .given(itemService).blockDates(eq(1L), any(), any(), eq(1L));
+
+        mockMvc.perform(post("/api/items/1/block")
+                .param("ownerId", "1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -213,5 +276,51 @@ public class ItemControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isEmpty()); // Lista vazia
+    }
+
+    @Test
+    public void whenGetItemsByOwner_thenReturnList() throws Exception {
+        Item item1 = Item.builder().id(1L).name("Bike").build();
+        Item item2 = Item.builder().id(2L).name("Surfboard").build();
+        
+        given(itemService.getItemsByOwner(1L)).willReturn(List.of(item1, item2));
+
+        mockMvc.perform(get("/api/items/owner/1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()", is(2)))
+                .andExpect(jsonPath("$[0].name", is("Bike")));
+    }
+
+    @Test
+    public void whenAddReview_thenReturnReview() throws Exception {
+        com.sportsgear.rentalplatform.dto.ReviewDTO reviewDTO = new com.sportsgear.rentalplatform.dto.ReviewDTO();
+        reviewDTO.setRating(5);
+        reviewDTO.setComment("Great gear!");
+
+        com.sportsgear.rentalplatform.data.Review savedReview = new com.sportsgear.rentalplatform.data.Review();
+        savedReview.setId(1L);
+        savedReview.setRating(5);
+        savedReview.setComment("Great gear!");
+
+        given(itemService.addReview(eq(1L), any())).willReturn(savedReview);
+
+        mockMvc.perform(post("/api/items/1/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(reviewDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comment", is("Great gear!")));
+    }
+
+    @Test
+    public void whenAddReviewToInvalidItem_thenReturn404() throws Exception {
+        com.sportsgear.rentalplatform.dto.ReviewDTO reviewDTO = new com.sportsgear.rentalplatform.dto.ReviewDTO();
+        // Assume service throws exception when item doesn't exist
+        given(itemService.addReview(eq(999L), any())).willThrow(new IllegalArgumentException("Item not found"));
+
+        mockMvc.perform(post("/api/items/999/reviews")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(reviewDTO)))
+                .andExpect(status().isNotFound());
     }
 }
