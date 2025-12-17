@@ -13,7 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class ItemRepositoryIT {
+class ItemRepositoryTest {
 
     @Autowired
     private ItemRepository itemRepository;
