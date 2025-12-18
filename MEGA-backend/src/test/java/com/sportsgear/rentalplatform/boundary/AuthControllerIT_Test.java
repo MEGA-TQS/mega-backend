@@ -3,6 +3,8 @@ package com.sportsgear.rentalplatform.boundary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sportsgear.rentalplatform.data.User;
 import com.sportsgear.rentalplatform.data.UserRepository;
+import com.sportsgear.rentalplatform.data.BookingRepository;
+import com.sportsgear.rentalplatform.data.ItemRepository;
 import com.sportsgear.rentalplatform.dto.LoginRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -24,10 +26,16 @@ public class AuthControllerIT_Test {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private UserRepository userRepository;
+    @Autowired private BookingRepository bookingRepository; 
+    @Autowired private ItemRepository itemRepository;
     @Autowired private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
+        bookingRepository.deleteAll();
+        
+        itemRepository.deleteAll();
+        
         userRepository.deleteAll();
     }
 
