@@ -119,6 +119,7 @@ class ItemServiceTest {
     }
     
     @Test
+    @Tag("US-2")
     void getItemById_ShouldReturnItem_WhenFound() {
         Long id = 1L;
         Item item = Item.builder().id(id).name("Kayak").build();
@@ -274,6 +275,7 @@ class ItemServiceTest {
     }
 
     @Test
+    @Tag("US-2")
     void addReview_ShouldSucceed_WhenUserAndItemExist() {
         // GIVEN
         Long itemId = 1L;

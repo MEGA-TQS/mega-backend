@@ -2,6 +2,8 @@ package com.sportsgear.rentalplatform.data;
 
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,6 +30,7 @@ public class BookingItem {
 
     @ManyToOne
     @JoinColumn(name = "booking_id")
+    @JsonIgnore
     private Booking booking;
 
     @ManyToOne

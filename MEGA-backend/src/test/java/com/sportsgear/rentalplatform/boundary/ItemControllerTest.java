@@ -153,6 +153,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-6")
     public void whenCreateItemOwnerNotFound_thenReturn400() throws Exception {
         ItemCreateDTO dto = new ItemCreateDTO();
         dto.setName("Kayak");
@@ -186,6 +187,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-7")
     public void whenUpdatePriceNotOwner_thenReturn403() throws Exception {
         ItemPriceUpdateDTO dto = new ItemPriceUpdateDTO();
         dto.setNewPrice(new BigDecimal("50.00"));
@@ -202,6 +204,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-7")
     public void whenUpdatePriceItemNotFound_thenReturn404() throws Exception {
         ItemPriceUpdateDTO dto = new ItemPriceUpdateDTO();
         dto.setNewPrice(new BigDecimal("50.00"));
@@ -252,6 +255,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-6")
     void whenDeleteItem_thenReturn204() throws Exception {
         Long itemId = 1L;
         
@@ -280,6 +284,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-6")
     public void whenGetItemsByOwner_thenReturnList() throws Exception {
         Item item1 = Item.builder().id(1L).name("Bike").build();
         Item item2 = Item.builder().id(2L).name("Surfboard").build();
@@ -294,6 +299,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-2")
     public void whenAddReview_thenReturnReview() throws Exception {
         com.sportsgear.rentalplatform.dto.ReviewDTO reviewDTO = new com.sportsgear.rentalplatform.dto.ReviewDTO();
         reviewDTO.setRating(5);
@@ -314,6 +320,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-2")
     public void whenAddReviewToInvalidItem_thenReturn404() throws Exception {
         com.sportsgear.rentalplatform.dto.ReviewDTO reviewDTO = new com.sportsgear.rentalplatform.dto.ReviewDTO();
         // Assume service throws exception when item doesn't exist

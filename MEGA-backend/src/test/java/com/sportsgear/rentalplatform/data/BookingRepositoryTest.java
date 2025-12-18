@@ -164,6 +164,7 @@ class BookingRepositoryTest {
     }
 
     @Test
+    @Tag("US-4")
     void findBookingsByOwner_ShouldReturnOnlyOwnerBookings() {
         // Setup
         User owner = User.builder().email("dono@test.com").name("Owner").build();

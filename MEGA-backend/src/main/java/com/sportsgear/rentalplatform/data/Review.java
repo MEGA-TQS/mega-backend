@@ -1,5 +1,7 @@
 package com.sportsgear.rentalplatform.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,7 +22,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "item_id")
-    @com.fasterxml.jackson.annotation.JsonIgnore 
+    @JsonIgnore
     private Item item;
 
     @ManyToOne
