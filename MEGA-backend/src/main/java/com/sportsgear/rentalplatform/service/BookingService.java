@@ -1,6 +1,7 @@
 package com.sportsgear.rentalplatform.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,13 @@ public class BookingService {
         User renter = userRepository.findById(request.getRenterId())
                 .orElseThrow(() -> new IllegalArgumentException("Renter not found with ID: " + request.getRenterId()));
 
+        
+
+        // Regra: Não permitir reservas com mais de 1 ano de antecedência
+        if (request.getStartDate().isAfter(LocalDate.now().plusYears(1))) {
+            throw new IllegalArgumentException("Bookings can only be made up to 1 year in advance.");
+        }
+        
         List<Item> itemsToRent = itemRepository.findAllById(request.getItemIds());
 
         if (itemsToRent.size() != request.getItemIds().size()) {
@@ -123,23 +131,42 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    // US5 - Processar Pagamento
     @Transactional
-    public Booking processPayment(Long bookingId, String paymentToken) {
+    public Booking updateStatus(Long bookingId, BookingStatus newStatus, Long userId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
 
-        if (booking.getStatus() != BookingStatus.APPROVED) {
-            throw new IllegalStateException("Payment failed: Booking is not in APPROVED state.");
+        if (newStatus == BookingStatus.PAID) {
+            throw new IllegalStateException("Cannot manually set status to PAID. Please use the Payment endpoint.");
         }
 
-        if ("INVALID".equals(paymentToken)) {
-            throw new IllegalStateException("Payment rejected by provider.");
+        if (newStatus == BookingStatus.CANCELLED) {
+            // Verificar quem está a tentar cancelar
+            boolean isRenter = booking.getRenter().getId().equals(userId);
+            
+            // Verifica se é o dono de pelo menos um item 
+            boolean isOwner = booking.getItems().stream()
+                    .anyMatch(bi -> bi.getItem().getOwner().getId().equals(userId));
+
+            if (!isRenter && !isOwner) {
+                throw new IllegalStateException("Only the Renter or the Owner can cancel a booking.");
+            }
+            // impedir cancelamento se já tiver passado a data de início
+            if (LocalDate.now().isAfter(booking.getStartDate())) {
+                 throw new IllegalStateException("Cannot cancel a booking that has already started.");
+            }
         }
 
-        booking.setStatus(BookingStatus.PAID);
-        
-        
+        // Atualiza o estado
+        booking.setStatus(newStatus);
         return bookingRepository.save(booking);
+    }
+
+    public List<Booking> getBookingsByRenter(Long renterId) {
+        return bookingRepository.findByRenterId(renterId);
+    }
+
+    public List<Booking> getBookingsForOwner(Long ownerId) {
+        return bookingRepository.findBookingsByOwner(ownerId);
     }
 }
