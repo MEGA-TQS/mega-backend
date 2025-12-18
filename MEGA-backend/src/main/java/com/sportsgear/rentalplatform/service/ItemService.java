@@ -129,6 +129,31 @@ public class ItemService {
         bookingRepository.save(block);
     }
 
+    
+    @Transactional
+    public com.sportsgear.rentalplatform.data.Review addReview(Long itemId, com.sportsgear.rentalplatform.dto.ReviewDTO dto) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found"));
+
+        User reviewer = userRepository.findById(dto.getReviewerId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        com.sportsgear.rentalplatform.data.Review review = com.sportsgear.rentalplatform.data.Review.builder()
+                .rating(dto.getRating())
+                .comment(dto.getComment())
+                .item(item)
+                .reviewer(reviewer)
+                .build();
+
+        if (item.getReviews() == null) {
+            item.setReviews(new ArrayList<>());
+        }
+        item.getReviews().add(review);
+        itemRepository.save(item); // O Cascade trata de salvar a review
+        
+        return review;
+    }
+
     public void deleteItem(Long id) {
         Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Item not found"));

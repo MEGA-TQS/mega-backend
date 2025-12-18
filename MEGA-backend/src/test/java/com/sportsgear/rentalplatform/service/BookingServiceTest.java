@@ -90,6 +90,55 @@ class BookingServiceTest {
     }
 
     @Test
+    void whenAcceptNonPendingBooking_thenThrowException() {
+        // GIVEN: Booking is Cancelled
+        booking.setStatus(BookingStatus.CANCELLED);
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN & THEN
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> 
+            bookingService.acceptBooking(100L, 2L));
+        
+        assertEquals("Only pending bookings can be accepted.", ex.getMessage());
+    }
+
+    @Test
+    @Tag("US-4")
+    void whenOwnerDeclines_thenStatusRejected() {
+        // GIVEN
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.declineBooking(100L, 2L); // Owner ID 2
+
+        // THEN
+        assertEquals(BookingStatus.REJECTED, result.getStatus());
+    }
+
+    @Test
+    void whenDeclineNonPendingBooking_thenThrowException() {
+        // GIVEN: Booking is already APPROVED
+        booking.setStatus(BookingStatus.APPROVED);
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN & THEN
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> 
+            bookingService.declineBooking(100L, 2L));
+        assertEquals("Only pending bookings can be declined.", ex.getMessage());
+    }
+
+    @Test
+    void whenNonOwnerDeclines_thenThrowException() {
+        // GIVEN
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN & THEN: User 99 tries to decline
+        assertThrows(IllegalStateException.class, () -> 
+            bookingService.declineBooking(100L, 99L));
+    }
+
+    @Test
     @Tag("US-4")
     void whenWrongOwnerTriesToAccept_thenThrowException() {
         // GIVEN
@@ -227,5 +276,198 @@ class BookingServiceTest {
 
         // Verificamos se a mensagem de erro é a correta
         assertEquals("Selected items are not available for the requested dates.", exception.getMessage());
+    }
+
+    @Test
+    @Tag("US-10")
+    void whenBookingMultipleItems_thenTotalIsSumOfAll() {
+        // GIVEN: Um pedido com 2 itens
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Arrays.asList(10L, 20L)); // Dois itens
+        req.setStartDate(LocalDate.now().plusDays(1));
+        req.setEndDate(LocalDate.now().plusDays(3)); // 2 dias de aluguer
+
+        // Mock Item 1 ( 20€/dia)
+        Item item1 = Item.builder().id(10L).pricePerDay(new BigDecimal("20.00")).active(true).build();
+        // Mock Item 2 (10€/dia)
+        Item item2 = Item.builder().id(20L).pricePerDay(new BigDecimal("10.00")).active(true).build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        // O repositório devolve os dois itens
+        when(itemRepository.findAllById(req.getItemIds())).thenReturn(Arrays.asList(item1, item2));
+        // Disponibilidade OK para ambos
+        when(bookingRepository.existsOverlappingBookings(anyList(), any(), any())).thenReturn(false);
+        // Capturar o que vai ser salvo
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.createGroupBooking(req);
+
+        // THEN
+        assertNotNull(result);
+        assertEquals(2, result.getItems().size()); // Tem 2 itens na lista
+
+        BigDecimal expectedTotal = new BigDecimal("60.00"); 
+        assertEquals(0, expectedTotal.compareTo(result.getTotalPrice())); 
+    }
+
+    @Test
+    void whenCreateBookingWithInvalidRenter_thenThrowException() {
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(999L); // Invalid ID
+
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> 
+            bookingService.createGroupBooking(req));
+    }
+
+    @Test
+    void whenCreateBookingWithInvalidItems_thenThrowException() {
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Arrays.asList(10L, 999L)); // 10 exists, 999 does not
+        
+        // FIX: Add dates to avoid NullPointerException
+        req.setStartDate(LocalDate.now().plusDays(1));
+        req.setEndDate(LocalDate.now().plusDays(3));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        
+        // Repo returns only 1 item (found), but we asked for 2
+        when(itemRepository.findAllById(anyList())).thenReturn(Collections.singletonList(item));
+
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> 
+            bookingService.createGroupBooking(req));
+        
+        assertEquals("Invalid Item IDs provided. Some items do not exist.", ex.getMessage());
+    }
+
+    @Test
+    @Tag("US-10")
+    void whenOneItemOfMultipleIsUnavailable_thenFailTransaction() {
+        // GIVEN: Pedido para 2 itens
+        BookingRequest req = new BookingRequest();
+        req.setRenterId(1L);
+        req.setItemIds(Arrays.asList(10L, 20L));
+        req.setStartDate(LocalDate.now().plusDays(1));
+        req.setEndDate(LocalDate.now().plusDays(3));
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
+        when(itemRepository.findAllById(anyList())).thenReturn(Arrays.asList(new Item(), new Item()));
+
+        // SIMULAÇÃO DO ERRO: O repositório diz que HÁ conflito (num deles ou nos dois)
+        when(bookingRepository.existsOverlappingBookings(
+                anyList(), any(), any()
+        )).thenReturn(true); 
+
+        // WHEN & THEN
+        Exception exception = assertThrows(IllegalStateException.class, () -> {
+            bookingService.createGroupBooking(req);
+        });
+
+        assertEquals("Selected items are not available for the requested dates.", exception.getMessage());
+    }
+
+    @Test
+    void updateStatus_ShouldCancel_WhenRenterRequests() {
+        // GIVEN
+        User renter = User.builder().id(1L).build();
+        
+        Booking booking = Booking.builder()
+                .id(100L)
+                .renter(renter)
+                .status(BookingStatus.PENDING)
+                .startDate(LocalDate.now().plusDays(5)) // <--- CORREÇÃO: Data futura (obrigatório)
+                .items(new java.util.ArrayList<>())     // (Mantém a lista que corrigimos antes)
+                .build();
+        
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN
+        Booking result = bookingService.updateStatus(100L, BookingStatus.CANCELLED, 1L);
+
+        // THEN
+        assertEquals(BookingStatus.CANCELLED, result.getStatus());
+    }
+
+    @Test
+    void updateStatus_ShouldThrow_WhenRandomUserTriesToCancel() {
+        // GIVEN
+        User renter = User.builder().id(1L).build();
+        User owner = User.builder().id(2L).build(); // Item owner
+        Item item = Item.builder().owner(owner).build();
+        
+        Booking booking = Booking.builder()
+                .id(100L)
+                .renter(renter)
+                .items(Collections.singletonList(BookingItem.builder().item(item).build()))
+                .build();
+        
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN: User 99 (Hacker) tries to cancel
+        assertThrows(IllegalStateException.class, () -> 
+            bookingService.updateStatus(100L, BookingStatus.CANCELLED, 99L));
+    }
+
+    @Test
+    void updateStatus_ShouldThrow_WhenTryingToSetPAIDManually() {
+        // GIVEN
+        Booking booking = Booking.builder().id(100L).build();
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN & THEN
+        assertThrows(IllegalStateException.class, () -> 
+            bookingService.updateStatus(100L, BookingStatus.PAID, 1L));
+    }
+
+    @Test
+    void updateStatus_ShouldCancel_WhenOwnerRequests() {
+        // GIVEN
+        booking.setStartDate(LocalDate.now().plusDays(5)); // Future date
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(i -> i.getArguments()[0]);
+
+        // WHEN: Owner (ID 2) cancels
+        Booking result = bookingService.updateStatus(100L, BookingStatus.CANCELLED, 2L);
+
+        // THEN
+        assertEquals(BookingStatus.CANCELLED, result.getStatus());
+    }
+
+    @Test
+    void updateStatus_ShouldThrow_WhenCancellingStartedBooking() {
+        // GIVEN: Start date was yesterday
+        booking.setStartDate(LocalDate.now().minusDays(1)); 
+        when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
+
+        // WHEN & THEN
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () -> 
+            bookingService.updateStatus(100L, BookingStatus.CANCELLED, 1L));
+        
+        assertEquals("Cannot cancel a booking that has already started.", ex.getMessage());
+    }
+
+    @Test
+    void getBookingsByRenter_ShouldReturnList() {
+        when(bookingRepository.findByRenterId(1L)).thenReturn(Collections.singletonList(booking));
+        
+        var result = bookingService.getBookingsByRenter(1L);
+        
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getBookingsForOwner_ShouldReturnList() {
+        when(bookingRepository.findBookingsByOwner(2L)).thenReturn(Collections.singletonList(booking));
+        
+        var result = bookingService.getBookingsForOwner(2L);
+        
+        assertFalse(result.isEmpty());
+        assertEquals(1, result.size());
     }
 }
