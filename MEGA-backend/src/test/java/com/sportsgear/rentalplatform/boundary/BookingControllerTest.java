@@ -104,6 +104,7 @@ public class BookingControllerTest {
     
     // Teste de Erro (Validation)
     @Test
+    @Tag("US-3")
     public void whenPostInvalidBooking_thenReturn400() throws Exception {
         BookingRequest request = new BookingRequest();
         // Falta renterId e dates -> Inválido
@@ -115,6 +116,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @Tag("US-3")
     void whenCreateBookingConflict_thenReturn400() throws Exception {
         BookingRequest req = new BookingRequest();
         req.setRenterId(1L);
@@ -164,6 +166,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @Tag("US-4")
     void whenDeclineBookingNotOwner_thenReturn400() throws Exception {
         given(bookingService.declineBooking(1L, 999L)).willThrow(new IllegalStateException("Not the owner"));
 
@@ -173,6 +176,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @Tag("US-4")
     void whenAcceptBookingNotFound_thenReturn404() throws Exception {
         given(bookingService.acceptBooking(999L, 5L)).willThrow(new IllegalArgumentException("Booking not found"));
 
@@ -182,6 +186,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @Tag("US-3")
     void whenGetBookingsByRenter_thenReturnList() throws Exception {
         Booking b1 = Booking.builder().id(1L).build();
         Booking b2 = Booking.builder().id(2L).build();
@@ -195,6 +200,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @Tag("US-4")
     void whenGetBookingsForOwner_thenReturnList() throws Exception {
         Booking b1 = Booking.builder().id(10L).build();
         
@@ -207,6 +213,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @Tag("US-3")
     void whenUpdateStatus_thenReturn200() throws Exception {
         Booking mockBooking = Booking.builder().id(1L).status(BookingStatus.CANCELLED).build();
         
@@ -220,6 +227,7 @@ public class BookingControllerTest {
     }
 
     @Test
+    @Tag("US-3")
     void whenUpdateStatusLogicError_thenReturn400() throws Exception {
         // Example: Trying to cancel an already completed booking
         given(bookingService.updateStatus(1L, BookingStatus.CANCELLED, 1L))

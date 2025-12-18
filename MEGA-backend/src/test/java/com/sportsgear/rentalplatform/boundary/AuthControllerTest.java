@@ -146,6 +146,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Tag("US-10")
     void register_DefaultRoleAssigned() throws Exception {
 
         User newUserNoRole = User.builder()

@@ -90,6 +90,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-4")
     void whenAcceptNonPendingBooking_thenThrowException() {
         // GIVEN: Booking is Cancelled
         booking.setStatus(BookingStatus.CANCELLED);
@@ -117,6 +118,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-4")
     void whenDeclineNonPendingBooking_thenThrowException() {
         // GIVEN: Booking is already APPROVED
         booking.setStatus(BookingStatus.APPROVED);
@@ -129,6 +131,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-4")
     void whenNonOwnerDeclines_thenThrowException() {
         // GIVEN
         when(bookingRepository.findById(100L)).thenReturn(Optional.of(booking));
@@ -313,6 +316,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-3")
     void whenCreateBookingWithInvalidRenter_thenThrowException() {
         BookingRequest req = new BookingRequest();
         req.setRenterId(999L); // Invalid ID
@@ -324,6 +328,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-3")
     void whenCreateBookingWithInvalidItems_thenThrowException() {
         BookingRequest req = new BookingRequest();
         req.setRenterId(1L);
@@ -371,6 +376,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-3")
     void updateStatus_ShouldCancel_WhenRenterRequests() {
         // GIVEN
         User renter = User.builder().id(1L).build();
@@ -394,6 +400,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-3")
     void updateStatus_ShouldThrow_WhenRandomUserTriesToCancel() {
         // GIVEN
         User renter = User.builder().id(1L).build();
@@ -414,6 +421,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-5")
     void updateStatus_ShouldThrow_WhenTryingToSetPAIDManually() {
         // GIVEN
         Booking booking = Booking.builder().id(100L).build();
@@ -425,6 +433,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-4")
     void updateStatus_ShouldCancel_WhenOwnerRequests() {
         // GIVEN
         booking.setStartDate(LocalDate.now().plusDays(5)); // Future date
@@ -439,6 +448,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-3")
     void updateStatus_ShouldThrow_WhenCancellingStartedBooking() {
         // GIVEN: Start date was yesterday
         booking.setStartDate(LocalDate.now().minusDays(1)); 
@@ -452,6 +462,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-3")
     void getBookingsByRenter_ShouldReturnList() {
         when(bookingRepository.findByRenterId(1L)).thenReturn(Collections.singletonList(booking));
         
@@ -462,6 +473,7 @@ class BookingServiceTest {
     }
 
     @Test
+    @Tag("US-4")
     void getBookingsForOwner_ShouldReturnList() {
         when(bookingRepository.findBookingsByOwner(2L)).thenReturn(Collections.singletonList(booking));
         

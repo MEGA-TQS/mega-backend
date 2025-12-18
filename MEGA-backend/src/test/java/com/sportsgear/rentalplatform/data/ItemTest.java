@@ -6,10 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 public class ItemTest {
     @Test
+    @Tag("US-2")
     void getAverageRating_ShouldReturnZero_WhenReviewsIsNull() {
 
         Item item = new Item();
@@ -21,6 +23,7 @@ public class ItemTest {
     }
 
     @Test
+    @Tag("US-2")
     void getAverageRating_ShouldReturnZero_WhenReviewsIsEmpty() {
 
         Item item = new Item();
@@ -32,6 +35,7 @@ public class ItemTest {
     }
 
     @Test
+    @Tag("US-2")
     void getAverageRating_ShouldReturnCorrectAverage_WhenReviewsExist() {
 
         Review r1 = new Review(); r1.setRating(5);
@@ -48,6 +52,7 @@ public class ItemTest {
     }
 
     @Test
+    @Tag("US-2")
     void getAverageRating_ShouldHandleDecimalResult() {
 
         Review r1 = new Review(); r1.setRating(5);
@@ -63,6 +68,7 @@ public class ItemTest {
     }
 
     @Test
+    @Tag("US-6")
     void builder_ShouldConstructItemCorrectly() {
 
         Item item = Item.builder()
