@@ -5,6 +5,8 @@ import com.sportsgear.rentalplatform.data.Role;
 import com.sportsgear.rentalplatform.data.User;
 import com.sportsgear.rentalplatform.data.UserRepository;
 import com.sportsgear.rentalplatform.dto.LoginRequest;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -32,6 +34,7 @@ public class AuthControllerTest {
     private UserRepository userRepository;
 
     @Test
+    @Tag("US-10")
     void login_Success() throws Exception {
         User user = User.builder()
                 .id(1L)
@@ -57,6 +60,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Tag("US-10")
     void login_WrongPassword() throws Exception {
         User user = User.builder()
                 .id(1L)
@@ -77,6 +81,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Tag("US-10")
     void login_UserNotFound() throws Exception {
         given(userRepository.findByEmail("nonexistent@example.com")).willReturn(null);
 
@@ -91,6 +96,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Tag("US-10")
     void register_Success() throws Exception {
         User newUser = User.builder()
                 .name("New User")
@@ -119,6 +125,7 @@ public class AuthControllerTest {
     }
 
     @Test
+    @Tag("US-10")
     void register_EmailAlreadyExists() throws Exception {
         User existingUser = User.builder()
                 .email("existing@example.com")

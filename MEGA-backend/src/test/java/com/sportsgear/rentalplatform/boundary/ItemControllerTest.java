@@ -235,6 +235,7 @@ public class ItemControllerTest {
     }
 
     @Test
+    @Tag("US-6")
     public void whenBlockDatesConflict_thenReturn400() throws Exception {
         BlockDateDTO dto = new BlockDateDTO();
         dto.setStartDate(LocalDate.now());

@@ -1,5 +1,6 @@
 package com.sportsgear.rentalplatform.data;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,6 +24,7 @@ class ItemRepositoryTest {
     // --- Availability Tests ---
 
     @Test
+    @Tag("US-1")
     void searchItems_ShouldExcludeBookedItems_WhenDatesOverlap() {
         // 1. Setup Data
         User owner = User.builder().email("owner@test.com").name("Owner").build();
@@ -78,6 +80,7 @@ class ItemRepositoryTest {
     // --- Filter Tests ---
 
     @Test
+    @Tag("US-1")
     void searchItems_ShouldFilterByPriceAndCategory() {
         // Setup
         User owner = User.builder().email("owner2@test.com").name("Owner").build();

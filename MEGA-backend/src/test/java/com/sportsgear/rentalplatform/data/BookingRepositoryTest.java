@@ -1,5 +1,6 @@
 package com.sportsgear.rentalplatform.data;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -23,6 +24,7 @@ class BookingRepositoryTest {
     // --- US3 & US6: Availability Logic Tests ---
 
     @Test
+    @Tag("US-9")
     void existsOverlappingBookings_ShouldReturnTrue_WhenDatesOverlap() {
         // Setup Data
         User renter = User.builder().email("renter@test.com").name("Renter").build();
@@ -75,6 +77,7 @@ class BookingRepositoryTest {
     }
 
     @Test
+    @Tag("US-9")
     void existsOverlappingBookings_ShouldReturnFalse_WhenDatesDoNotOverlap() {
         // Setup (Same as above)
         User renter = User.builder().email("renter2@test.com").name("Renter").build();
@@ -108,6 +111,7 @@ class BookingRepositoryTest {
     }
 
     @Test
+    @Tag("US-9")
     void existsOverlappingBookings_ShouldIgnoreCancelledBookings() {
         // Setup
         User renter = User.builder().email("renter3@test.com").name("Renter").build();
@@ -136,6 +140,7 @@ class BookingRepositoryTest {
     // History Tests
 
     @Test
+    @Tag("US-3")
     void findByRenterId_ShouldReturnUserBookings() {
         // Setup Users
         User renter1 = User.builder().email("r1@test.com").name("R1").build();
