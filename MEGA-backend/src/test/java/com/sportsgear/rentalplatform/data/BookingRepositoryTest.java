@@ -1,5 +1,6 @@
 package com.sportsgear.rentalplatform.data;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -12,7 +13,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class BookingRepositoryIT {
+class BookingRepositoryTest {
 
     @Autowired
     private BookingRepository bookingRepository;
@@ -23,6 +24,7 @@ class BookingRepositoryIT {
     // --- US3 & US6: Availability Logic Tests ---
 
     @Test
+    @Tag("US-9")
     void existsOverlappingBookings_ShouldReturnTrue_WhenDatesOverlap() {
         // Setup Data
         User renter = User.builder().email("renter@test.com").name("Renter").build();
@@ -75,6 +77,7 @@ class BookingRepositoryIT {
     }
 
     @Test
+    @Tag("US-9")
     void existsOverlappingBookings_ShouldReturnFalse_WhenDatesDoNotOverlap() {
         // Setup (Same as above)
         User renter = User.builder().email("renter2@test.com").name("Renter").build();
@@ -108,6 +111,7 @@ class BookingRepositoryIT {
     }
 
     @Test
+    @Tag("US-9")
     void existsOverlappingBookings_ShouldIgnoreCancelledBookings() {
         // Setup
         User renter = User.builder().email("renter3@test.com").name("Renter").build();
@@ -136,6 +140,7 @@ class BookingRepositoryIT {
     // History Tests
 
     @Test
+    @Tag("US-3")
     void findByRenterId_ShouldReturnUserBookings() {
         // Setup Users
         User renter1 = User.builder().email("r1@test.com").name("R1").build();
@@ -156,5 +161,41 @@ class BookingRepositoryIT {
         
         assertThat(r1Bookings).hasSize(1);
         assertThat(r1Bookings.get(0).getRenter()).isEqualTo(renter1);
+    }
+
+    @Test
+    void findBookingsByOwner_ShouldReturnOnlyOwnerBookings() {
+        // Setup
+        User owner = User.builder().email("dono@test.com").name("Owner").build();
+        User otherOwner = User.builder().email("outro@test.com").name("Other").build();
+        User renter = User.builder().email("renter@test.com").name("Renter").build();
+        
+        entityManager.persist(owner);
+        entityManager.persist(otherOwner);
+        entityManager.persist(renter);
+
+        // Item do Owner 1
+        Item item1 = Item.builder().name("Item 1").owner(owner).pricePerDay(BigDecimal.TEN).active(true).build();
+        entityManager.persist(item1);
+
+        // Item do Owner 2
+        Item item2 = Item.builder().name("Item 2").owner(otherOwner).pricePerDay(BigDecimal.TEN).active(true).build();
+        entityManager.persist(item2);
+
+        // Reserva no Item 1 (Deve aparecer)
+        Booking b1 = Booking.builder().renter(renter).status(BookingStatus.PENDING).build();
+        entityManager.persist(b1);
+        entityManager.persist(BookingItem.builder().booking(b1).item(item1).build());
+
+        // Reserva no Item 2 (NÃO deve aparecer)
+        Booking b2 = Booking.builder().renter(renter).status(BookingStatus.PENDING).build();
+        entityManager.persist(b2);
+        entityManager.persist(BookingItem.builder().booking(b2).item(item2).build());
+
+        // Teste
+        List<Booking> ownerBookings = bookingRepository.findBookingsByOwner(owner.getId());
+
+        assertThat(ownerBookings).hasSize(1);
+        assertThat(ownerBookings.get(0).getId()).isEqualTo(b1.getId());
     }
 }
