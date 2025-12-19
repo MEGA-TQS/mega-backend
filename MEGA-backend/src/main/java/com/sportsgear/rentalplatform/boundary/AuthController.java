@@ -34,16 +34,13 @@ public class AuthController {
         response.setUserId(user.getId());
         response.setName(user.getName());
         response.setEmail(user.getEmail());
-        
-        // Convert Set<Role> to simple string representation for now
-        // Or keep the first role as primary (simplified approach)
-        String primaryRole = user.getRoles().stream()
-                .findFirst()
-                .map(Enum::name)
-                .orElse("USER");
-        response.setRole(primaryRole);
-        
         response.setToken(user.getId().toString());
+        
+        if (user.getRoles().contains(com.sportsgear.rentalplatform.data.Role.ADMIN)) {
+            response.setRole("ADMIN");
+        } else {
+            response.setRole("USER"); 
+        }
         
         return ResponseEntity.ok(response);
     }

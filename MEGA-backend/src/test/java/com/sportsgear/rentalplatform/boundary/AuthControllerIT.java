@@ -5,7 +5,7 @@ import com.sportsgear.rentalplatform.data.UserRepository;
 import com.sportsgear.rentalplatform.data.BookingRepository;
 import com.sportsgear.rentalplatform.data.ItemRepository;
 import com.sportsgear.rentalplatform.dto.LoginRequest;
-import com.sportsgear.rentalplatform.dto.RegisterRequestDTO; // Import this!
+import com.sportsgear.rentalplatform.dto.RegisterRequestDTO; 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ public class AuthControllerIT {
                 .content(objectMapper.writeValueAsString(registerReq)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token", notNullValue()))
-                .andExpect(jsonPath("$.role").value("USER")); // Validate new logic
+                .andExpect(jsonPath("$.role").value("USER")); // Verified Registration Role
 
         // 2. LOGIN
         LoginRequest loginReq = new LoginRequest();
@@ -63,6 +63,9 @@ public class AuthControllerIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginReq)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token", notNullValue()));
+                .andExpect(jsonPath("$.token", notNullValue()))
+                // --- THIS IS THE FIX ---
+                // We verify that Login ALSO returns "USER" so the frontend menu works
+                .andExpect(jsonPath("$.role").value("USER")); 
     }
 }

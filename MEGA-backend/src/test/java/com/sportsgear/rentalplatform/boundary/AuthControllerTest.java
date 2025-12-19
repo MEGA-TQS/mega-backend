@@ -5,7 +5,7 @@ import com.sportsgear.rentalplatform.data.Role;
 import com.sportsgear.rentalplatform.data.User;
 import com.sportsgear.rentalplatform.data.UserRepository;
 import com.sportsgear.rentalplatform.dto.LoginRequest;
-import com.sportsgear.rentalplatform.dto.RegisterRequestDTO; // Import this!
+import com.sportsgear.rentalplatform.dto.RegisterRequestDTO;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,7 @@ public class AuthControllerTest {
     @Test
     @Tag("US-10")
     void login_Success() throws Exception {
-        // Setup a user who is Renter + Owner
+        // Setup a user who has RENTER + OWNER roles in the database
         User user = User.builder()
                 .id(1L)
                 .email("test@example.com")
@@ -52,20 +52,20 @@ public class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(1))
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.role").value("USER")) // Matches new login logic
                 .andExpect(jsonPath("$.token").value("1"));
     }
 
     @Test
     @Tag("US-10")
     void register_Success_AsUser() throws Exception {
-        // 1. Input: Register as "USER"
         RegisterRequestDTO request = new RegisterRequestDTO();
         request.setName("New User");
         request.setEmail("new@example.com");
         request.setPassword("password123");
         request.setRole("USER");
 
-        // 2. Mock DB Result: Gets Renter + Owner permissions
         User savedUser = User.builder()
                 .id(2L)
                 .name("New User")
@@ -77,27 +77,23 @@ public class AuthControllerTest {
         given(userRepository.findByEmail("new@example.com")).willReturn(null);
         given(userRepository.save(any(User.class))).willReturn(savedUser);
 
-        // 3. Assertion: Expect simplified "USER" role in response
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(2))
-                .andExpect(jsonPath("$.email").value("new@example.com"))
-                .andExpect(jsonPath("$.role").value("USER")); // <--- UPDATED
+                .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test
     @Tag("US-10")
     void register_Success_AsAdmin() throws Exception {
-        // 1. Input: Register as "ADMIN"
         RegisterRequestDTO request = new RegisterRequestDTO();
         request.setName("Admin User");
         request.setEmail("admin@example.com");
         request.setPassword("secure");
         request.setRole("ADMIN");
 
-        // 2. Mock DB Result: Gets ALL permissions
         User savedUser = User.builder()
                 .id(3L)
                 .name("Admin User")
@@ -108,7 +104,6 @@ public class AuthControllerTest {
         given(userRepository.findByEmail("admin@example.com")).willReturn(null);
         given(userRepository.save(any(User.class))).willReturn(savedUser);
 
-        // 3. Assertion: Expect "ADMIN" role
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
