@@ -33,35 +33,25 @@ public class BookingController {
     }
 
 
-    // PATCH /api/bookings/{id}/accept?ownerId=5
-    // O Owner aprova a reserva
+ // PATCH /api/bookings/{id}/accept
     @PatchMapping("/{id}/accept")
-    public ResponseEntity<Booking> acceptBooking(
-            @PathVariable Long id, 
-            @RequestParam Long ownerId) {
+    public ResponseEntity<Booking> acceptBooking(@PathVariable Long id) {
         try {
-            Booking booking = bookingService.acceptBooking(id, ownerId);
+            Booking booking = bookingService.acceptBooking(id);
             return ResponseEntity.ok(booking);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build(); // 404 se reserva não existe
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build(); // 400 se não for dono ou status errado
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
-    // PATCH /api/bookings/{id}/decline?ownerId=5
-    // O Owner rejeita a reserva
+    // PATCH /api/bookings/{id}/decline
     @PatchMapping("/{id}/decline")
-    public ResponseEntity<Booking> declineBooking(
-            @PathVariable Long id, 
-            @RequestParam Long ownerId) {
+    public ResponseEntity<Booking> declineBooking(@PathVariable Long id) {
         try {
-            Booking booking = bookingService.declineBooking(id, ownerId);
+            Booking booking = bookingService.declineBooking(id);
             return ResponseEntity.ok(booking);
-        } catch (IllegalArgumentException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().build();
         }
     }
 

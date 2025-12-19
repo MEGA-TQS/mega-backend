@@ -90,43 +90,19 @@ public class BookingService {
     }
 
     @Transactional
-    public Booking acceptBooking(Long bookingId, Long ownerId) {
+    public Booking acceptBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-    
-        // Já verificado se é pending
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new IllegalStateException("Only pending bookings can be accepted.");
-        }
-    
-        // Validar se o owner é realmente o dono dos items
-        boolean allBelongToOwner = booking.getItems().stream()
-                .allMatch(bi -> bi.getItem().getOwner().getId().equals(ownerId));
-    
-        if (!allBelongToOwner) {
-            throw new IllegalStateException("User is not the owner of all rented items.");
-        }
-    
+        
         booking.setStatus(BookingStatus.APPROVED);
         return bookingRepository.save(booking);
     }
-    
+
     @Transactional
-    public Booking declineBooking(Long bookingId, Long ownerId) {
+    public Booking declineBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Booking not found"));
-    
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new IllegalStateException("Only pending bookings can be declined.");
-        }
-    
-        boolean allBelongToOwner = booking.getItems().stream()
-                .allMatch(bi -> bi.getItem().getOwner().getId().equals(ownerId));
-    
-        if (!allBelongToOwner) {
-            throw new IllegalStateException("User is not the owner of all rented items.");
-        }
-    
+        
         booking.setStatus(BookingStatus.REJECTED);
         return bookingRepository.save(booking);
     }
