@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15
+    container_name: mega-postgres
+    environment:
+      POSTGRES_USER: mega      # Matches spring.datasource.username
+      POSTGRES_PASSWORD: mega  # Matches spring.datasource.password
+      POSTGRES_DB: mega        # Matches the DB name in the URL
+    ports:
+      - "5432:5432"            # Exposes port 5432 to your local machine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+
+# run db:
+# $ docker-compose up db
+
+# then run backend:
+# $ mvn spring-boot:run

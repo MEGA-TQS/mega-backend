@@ -17,33 +17,35 @@ public class PaymentService {
     private final BookingRepository bookingRepository;
     
     public PaymentResponse processPayment(PaymentRequest request) {
-        // 1. Find the booking
+        // 1. Validate Booking Exists
         Booking booking = bookingRepository.findById(request.getBookingId())
                 .orElse(null);
         
         if (booking == null) {
-            return new PaymentResponse(false, null, "Booking not found");
+            return new PaymentResponse(false, null, "Booking not found with ID: " + request.getBookingId());
         }
         
-        // 2. Check if booking is approved (ready for payment)
+        // 2. Validate Booking Status (Must be APPROVED to pay)
         if (booking.getStatus() != BookingStatus.APPROVED) {
             return new PaymentResponse(false, null, 
-                "Booking must be approved before payment. Current status: " + booking.getStatus());
+                "Booking cannot be paid. Current status: " + booking.getStatus());
         }
         
-        // 3. SUPER SIMPLE payment validation
-        // Card ending with "4242" = success, anything else = failure
-        if (request.getCardNumber() == null || !request.getCardNumber().endsWith("4242")) {
-            return new PaymentResponse(false, null, "Payment failed: invalid card");
+        // 3. SIMPLIFIED MOCK LOGIC
+        // If you specifically type "fail" as the card number, we simulate a decline.
+        // Otherwise, we ACCEPT EVERYTHING.
+        String cardNum = request.getCardNumber() != null ? request.getCardNumber().trim() : "";
+        
+        if (cardNum.equalsIgnoreCase("fail")) {
+            return new PaymentResponse(false, null, "Payment declined by bank (Mock)");
         }
         
-        // 4. Process payment (mock)
+        // 4. Success Path
         booking.setStatus(BookingStatus.PAID);
         bookingRepository.save(booking);
         
-        // 5. Generate fake transaction ID
-        String transactionId = "TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String mockTxnId = "TXN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         
-        return new PaymentResponse(true, transactionId, "Payment successful");
+        return new PaymentResponse(true, mockTxnId, "Payment Approved (Mock)");
     }
 }
