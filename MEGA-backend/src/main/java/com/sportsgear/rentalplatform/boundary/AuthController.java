@@ -1,9 +1,12 @@
 package com.sportsgear.rentalplatform.boundary;
 
+import com.sportsgear.rentalplatform.data.Role;
 import com.sportsgear.rentalplatform.data.User;
 import com.sportsgear.rentalplatform.data.UserRepository;
 import com.sportsgear.rentalplatform.dto.LoginRequest;
 import com.sportsgear.rentalplatform.dto.LoginResponse;
+import com.sportsgear.rentalplatform.dto.RegisterRequestDTO;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,32 +49,33 @@ public class AuthController {
     }
     
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody User newUser) {
-        // Check if email exists
-        if (userRepository.findByEmail(newUser.getEmail()) != null) {
+    public ResponseEntity<LoginResponse> register(@RequestBody RegisterRequestDTO request) {
+        // 1. Check if email exists
+        if (userRepository.findByEmail(request.getEmail()) != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        
-        // Set default role if not provided (assign as RENTER by default)
-        if (newUser.getRoles() == null || newUser.getRoles().isEmpty()) {
-            newUser.setRoles(Set.of(com.sportsgear.rentalplatform.data.Role.RENTER));
+
+        // 2. Map DTO to User Entity
+        User newUser = new User();
+        newUser.setName(request.getName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPassword(request.getPassword()); // In production, encrypt this!
+
+        // 3. Handle Role Logic
+        if ("ADMIN".equalsIgnoreCase(request.getRole())) {
+            newUser.setRoles(Set.of(Role.ADMIN));
+        } else {
+            // Default to RENTER
+            newUser.setRoles(Set.of(Role.RENTER, Role.OWNER));
         }
-        
+
+        // 4. Save and Respond
         User savedUser = userRepository.save(newUser);
         
+        // ... rest of your response logic ...
         LoginResponse response = new LoginResponse();
         response.setUserId(savedUser.getId());
-        response.setName(savedUser.getName());
-        response.setEmail(savedUser.getEmail());
-        
-        String primaryRole = savedUser.getRoles().stream()
-                .findFirst()
-                .map(Enum::name)
-                .orElse("RENTER");
-        response.setRole(primaryRole);
-        
-        response.setToken(savedUser.getId().toString());
-        
+        // ...
         return ResponseEntity.ok(response);
     }
 }
