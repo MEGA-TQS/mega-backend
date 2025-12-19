@@ -17,13 +17,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class PaymentControllerIT_Test {
+public class PaymentControllerIT {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private BookingRepository bookingRepository;
@@ -37,7 +38,7 @@ public class PaymentControllerIT_Test {
     @Test
     @Tag("US-5")
     void processPayment_Integration_ShouldUpdateBookingStatus() throws Exception {
-        // Criar Reserva Aprovada na BD
+        // 1. Create APPROVED Booking in DB
         Booking booking = Booking.builder()
                 .status(BookingStatus.APPROVED)
                 .totalPrice(new BigDecimal("50.00"))
@@ -46,21 +47,22 @@ public class PaymentControllerIT_Test {
                 .build();
         booking = bookingRepository.save(booking);
 
-        // Criar Request de Pagamento
+        // 2. Create Payment Request
         PaymentRequest req = new PaymentRequest();
         req.setBookingId(booking.getId());
-        req.setCardNumber("4242"); // Cartão válido
+        req.setCardNumber("4242"); // Any card != "fail" will work
         req.setCardHolder("Rich User");
 
-        // Chamar API
+        // 3. Call API
         mockMvc.perform(post("/api/payments/pay")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Payment Approved (Mock)"));
 
-        // Verificar na BD se mudou para PAID
+        // 4. Verify DB Status Changed to PAID
         Booking updatedBooking = bookingRepository.findById(booking.getId()).orElseThrow();
-        assert(updatedBooking.getStatus() == BookingStatus.PAID);
+        assertEquals(BookingStatus.PAID, updatedBooking.getStatus());
     }
 }
