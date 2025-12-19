@@ -61,21 +61,35 @@ public class AuthController {
         newUser.setEmail(request.getEmail());
         newUser.setPassword(request.getPassword()); // In production, encrypt this!
 
-        // 3. Handle Role Logic
+        // 3. Handle Role Logic (The requested logic)
         if ("ADMIN".equalsIgnoreCase(request.getRole())) {
-            newUser.setRoles(Set.of(Role.ADMIN));
+            // If they register as Admin, they are an ADMIN
+            // (Optional: Add RENTER/OWNER if admins should also book/list items)
+            newUser.setRoles(Set.of(Role.ADMIN, Role.RENTER, Role.OWNER)); 
         } else {
-            // Default to RENTER
+            // Default: If they register as "USER" (or anything else), 
+            // they become BOTH a Renter and an Owner.
             newUser.setRoles(Set.of(Role.RENTER, Role.OWNER));
         }
 
-        // 4. Save and Respond
+        // 4. Save User
         User savedUser = userRepository.save(newUser);
         
-        // ... rest of your response logic ...
+        // 5. Build Response
         LoginResponse response = new LoginResponse();
         response.setUserId(savedUser.getId());
-        // ...
+        response.setName(savedUser.getName());
+        response.setEmail(savedUser.getEmail());
+
+
+        if (savedUser.getRoles().contains(Role.ADMIN)) {
+            response.setRole("ADMIN");
+        } else {
+            response.setRole("USER"); 
+        }
+
+        response.setToken(savedUser.getId().toString());
+        
         return ResponseEntity.ok(response);
     }
 }

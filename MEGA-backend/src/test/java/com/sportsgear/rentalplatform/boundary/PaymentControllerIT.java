@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
-public class PaymentControllerIT_Test {
+public class PaymentControllerIT {
 
     @Autowired private MockMvc mockMvc;
     @Autowired private BookingRepository bookingRepository;

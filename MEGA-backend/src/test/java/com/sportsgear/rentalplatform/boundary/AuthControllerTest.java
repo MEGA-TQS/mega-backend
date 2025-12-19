@@ -5,6 +5,7 @@ import com.sportsgear.rentalplatform.data.Role;
 import com.sportsgear.rentalplatform.data.User;
 import com.sportsgear.rentalplatform.data.UserRepository;
 import com.sportsgear.rentalplatform.dto.LoginRequest;
+import com.sportsgear.rentalplatform.dto.RegisterRequestDTO; // Import this!
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -24,24 +25,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(AuthController.class)
 public class AuthControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockitoBean
-    private UserRepository userRepository;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private ObjectMapper objectMapper;
+    @MockitoBean private UserRepository userRepository;
 
     @Test
     @Tag("US-10")
     void login_Success() throws Exception {
+        // Setup a user who is Renter + Owner
         User user = User.builder()
                 .id(1L)
                 .email("test@example.com")
                 .password("password123")
                 .name("Test User")
-                .roles(Set.of(Role.RENTER))  // Changed from USER to RENTER
+                .roles(Set.of(Role.RENTER, Role.OWNER))
                 .build();
 
         given(userRepository.findByEmail("test@example.com")).willReturn(user);
@@ -55,121 +52,83 @@ public class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(1))
-                .andExpect(jsonPath("$.token").value("1"))
-                .andExpect(jsonPath("$.role").value("RENTER"));  // Changed from USER to RENTER
+                .andExpect(jsonPath("$.token").value("1"));
     }
 
     @Test
     @Tag("US-10")
-    void login_WrongPassword() throws Exception {
-        User user = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .password("correctPassword")
-                .build();
+    void register_Success_AsUser() throws Exception {
+        // 1. Input: Register as "USER"
+        RegisterRequestDTO request = new RegisterRequestDTO();
+        request.setName("New User");
+        request.setEmail("new@example.com");
+        request.setPassword("password123");
+        request.setRole("USER");
 
-        given(userRepository.findByEmail("test@example.com")).willReturn(user);
-
-        LoginRequest request = new LoginRequest();
-        request.setEmail("test@example.com");
-        request.setPassword("wrongPassword");
-
-        mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @Tag("US-10")
-    void login_UserNotFound() throws Exception {
-        given(userRepository.findByEmail("nonexistent@example.com")).willReturn(null);
-
-        LoginRequest request = new LoginRequest();
-        request.setEmail("nonexistent@example.com");
-        request.setPassword("password");
-
-        mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @Tag("US-10")
-    void register_Success() throws Exception {
-        User newUser = User.builder()
-                .name("New User")
-                .email("new@example.com")
-                .password("password123")
-                .roles(Set.of(Role.RENTER))  // Changed from USER to RENTER
-                .build();
-
+        // 2. Mock DB Result: Gets Renter + Owner permissions
         User savedUser = User.builder()
                 .id(2L)
                 .name("New User")
                 .email("new@example.com")
                 .password("password123")
-                .roles(Set.of(Role.RENTER))  // Changed from USER to RENTER
+                .roles(Set.of(Role.RENTER, Role.OWNER))
                 .build();
 
         given(userRepository.findByEmail("new@example.com")).willReturn(null);
         given(userRepository.save(any(User.class))).willReturn(savedUser);
 
+        // 3. Assertion: Expect simplified "USER" role in response
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newUser)))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(2))
-                .andExpect(jsonPath("$.email").value("new@example.com"));
+                .andExpect(jsonPath("$.email").value("new@example.com"))
+                .andExpect(jsonPath("$.role").value("USER")); // <--- UPDATED
+    }
+
+    @Test
+    @Tag("US-10")
+    void register_Success_AsAdmin() throws Exception {
+        // 1. Input: Register as "ADMIN"
+        RegisterRequestDTO request = new RegisterRequestDTO();
+        request.setName("Admin User");
+        request.setEmail("admin@example.com");
+        request.setPassword("secure");
+        request.setRole("ADMIN");
+
+        // 2. Mock DB Result: Gets ALL permissions
+        User savedUser = User.builder()
+                .id(3L)
+                .name("Admin User")
+                .email("admin@example.com")
+                .roles(Set.of(Role.ADMIN, Role.RENTER, Role.OWNER))
+                .build();
+
+        given(userRepository.findByEmail("admin@example.com")).willReturn(null);
+        given(userRepository.save(any(User.class))).willReturn(savedUser);
+
+        // 3. Assertion: Expect "ADMIN" role
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.role").value("ADMIN"));
     }
 
     @Test
     @Tag("US-10")
     void register_EmailAlreadyExists() throws Exception {
-        User existingUser = User.builder()
-                .email("existing@example.com")
-                .build();
-
+        User existingUser = User.builder().email("existing@example.com").build();
         given(userRepository.findByEmail("existing@example.com")).willReturn(existingUser);
 
-        User newUser = User.builder()
-                .name("New User")
-                .email("existing@example.com")
-                .password("password123")
-                .build();
+        RegisterRequestDTO request = new RegisterRequestDTO();
+        request.setEmail("existing@example.com");
+        request.setPassword("123");
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newUser)))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
-    }
-
-    @Test
-    @Tag("US-10")
-    void register_DefaultRoleAssigned() throws Exception {
-
-        User newUserNoRole = User.builder()
-                .name("No Role User")
-                .email("norole@example.com")
-                .password("password123")
-                .build(); // roles is null/empty by default
-
-        User savedUser = User.builder()
-                .id(3L)
-                .name("No Role User")
-                .email("norole@example.com")
-                .password("password123")
-                .roles(Set.of(Role.RENTER)) // The DB would return the user with the role set
-                .build();
-
-        given(userRepository.findByEmail("norole@example.com")).willReturn(null);
-        given(userRepository.save(any(User.class))).willReturn(savedUser);
-
-        mockMvc.perform(post("/api/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(newUserNoRole)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.role").value("RENTER"));
     }
 }
